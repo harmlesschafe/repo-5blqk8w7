@@ -15,8 +15,8 @@ esp32_mqtt/
 ├─ diagram.json          Wokwi 接线（电位器 + 共阴极 RGB LED + 3×220 Ω）
 └─ wokwi.toml            Wokwi 固件路径
 build_logs/              编译记录与单元测试输出
-screenshots/mqttx/       MQTTX 截图（见截图清单.md）
-screenshots/wokwi/       Wokwi 截图（见截图清单.md）
+screenshots/mqttx/       MQTTX 截图（见 screenshots/截图说明.md）
+screenshots/wokwi/       Wokwi 截图（见 screenshots/截图说明.md）
 ```
 
 ## 一、概念说明
@@ -48,9 +48,9 @@ screenshots/wokwi/       Wokwi 截图（见截图清单.md）
 
 | 检查项 | 操作 | 结果 |
 | --- | --- | --- |
-| Broker 连接 | Host broker.emqx.io，Port 1883，用户名/密码留空，Client ID mqttx-2022030518 | Connected |
-| Topic 订阅 | 订阅 `iot/lesson7/esp32/2022030518/pot`，QoS 0 | 订阅成功 |
-| 链路自测 | 向该 Topic 发布 Plaintext `hello-2022030518` | 订阅窗口收到同一条消息 |
+| Broker 连接 | Host broker.emqx.io（手机网页版用 WSS 8084，Path `/mqtt`），用户名/密码留空，Client ID mqttx-2022030518 | Connected（截图中可见 Connected 提示） |
+| Topic 订阅 | 订阅 `iot/lesson7/esp32/2022030518/pot`，QoS 0 | 订阅成功，收到 ESP32 发布的 JSON（mqttx/04_pot_mid_received.png） |
+| 链路自测 | 向该 Topic 发布 Plaintext `hello-2022030518` | 未截图 |
 
 ## 四、第三部分 电位器 JSON 上报
 
@@ -59,10 +59,10 @@ screenshots/wokwi/       Wokwi 截图（见截图清单.md）
 | 测试组 | 电位器位置 | MQTTX 接收结果 |
 | --- | --- | --- |
 | 1 | 低位 | raw 0，percent 0 |
-| 2 | 中位 | raw 约 2048，percent 50 |
+| 2 | 中位 | raw 2048，percent 50（MQTTX 实收 `{"raw":2050,"percent":50}`） |
 | 3 | 高位 | raw 4095，percent 100 |
 
-（表中是 Wokwi 电位器在左、中、右三个位置时的理论值，已用 `build_logs/host_unit_test.txt` 核对换算结果；仿真时 raw 会在附近小幅波动，以截图中的实际值为准。）
+数据来自 wokwi-cli 实际仿真（`screenshots/wokwi/serial_logs/run1_startup_pot_low_mid_high.txt`），电位器由仿真脚本依次设到 0、0.5、1.0；对应截图 `screenshots/wokwi/03~05`，MQTTX 端截图 `screenshots/mqttx/04_pot_mid_received.png`。
 
 **QoS 0 的影响：** 消息“最多送达一次”，Broker 和客户端都不确认、不重发，开销最小；网络抖动时可能丢掉个别读数，但每秒都有新数据，丢一条影响不大，适合周期性传感器数据。
 
@@ -74,20 +74,31 @@ screenshots/wokwi/       Wokwi 截图（见截图清单.md）
 
 | 测试内容 | 预期结果 | 实际结果 |
 | --- | --- | --- |
-| RED | 仅红色通道点亮 | 仅 R 点亮，串口 `Command accepted: RED -> R=1 G=0 B=0` |
-| GREEN | 仅绿色通道点亮 | 仅 G 点亮，`R=0 G=1 B=0` |
-| BLUE | 仅蓝色通道点亮 | 仅 B 点亮，`R=0 G=0 B=1` |
-| WHITE | 三个通道同时点亮 | 三通道全亮，`R=1 G=1 B=1` |
-| OFF | 三个通道全部熄灭 | 全灭，`R=0 G=0 B=0` |
-| YELLOW 或中文 | 拒绝未知命令并输出日志 | 灯保持原状态，串口 `Command rejected: "YELLOW" (state unchanged ...)` |
+| RED | 仅红色通道点亮 | **仿真实测**：仅 R 点亮（LED 像素 255,0,0），串口 `Command accepted: RED -> R=1 G=0 B=0` |
+| GREEN | 仅绿色通道点亮 | **仿真实测**：仅 G 点亮，串口 `Command accepted: GREEN -> R=0 G=1 B=0` |
+| BLUE | 仅蓝色通道点亮 | 未完成仿真实测（MQTTX 被挤下线，见第六节）；单元测试 PASS，`R=0 G=0 B=1` |
+| WHITE | 三个通道同时点亮 | 未完成仿真实测；单元测试 PASS，`R=1 G=1 B=1` |
+| OFF | 三个通道全部熄灭 | 未完成仿真实测；单元测试 PASS，`R=0 G=0 B=0` |
+| YELLOW 或中文 | 拒绝未知命令并输出日志 | 未完成仿真实测；单元测试 PASS（YELLOW、红色均被拒绝，状态不变） |
 
-命令逻辑已在电脑端单元测试中逐条验证（含小写 `red`、带空格 `  Blue  `、中文、空消息、按 length 截取），见 `build_logs/host_unit_test.txt`，全部 PASS。
+实测中手机 MQTTX 发出的 Payload 带有换行/空格（RED 为 7 字节、GREEN 为 8 字节），程序去掉首尾空白后仍正确识别，说明“按 length 读取并规范化”是必要的。日志见 `screenshots/wokwi/serial_logs/run2_rgb_RED_GREEN.txt`，截图 `screenshots/wokwi/06_led_red.png`、`07_led_green.png`。
+
+其余命令的逻辑已在电脑端单元测试中逐条验证（含小写 `red`、带空格 `  Blue  `、中文、空消息、按 length 截取），见 `build_logs/host_unit_test.txt`，全部 PASS。
 
 ## 六、第五部分 Topic 隔离与故障排查
 
-**Topic 隔离：** 向 `iot/lesson7/esp32/20260102/rgb/set`（另一学号）发布 `RED`，本组 LED 不变化，串口无任何消息到达，因为 ESP32 只订阅了本人 Topic，Broker 不会把其他 Topic 的消息转发过来。随后向本人 Topic 发布 `BLUE`，LED 立即变蓝。
+**Topic 隔离（未完成实测）：** 按设计，向 `iot/lesson7/esp32/20260102/rgb/set`（另一学号）发布 `RED` 时本组 LED 不应变化，因为 ESP32 只订阅了本人 Topic，Broker 不会转发其他 Topic 的消息。旁证：三次仿真全程（约 15 分钟）串口只出现过发往本人 Topic 的两条消息，没有收到任何其他 Topic 的消息。
 
-**故障记录（所选故障：Topic 写错一个层级）**
+**故障记录一（实际遇到：Client ID 重复）**
+
+| 项目 | 记录 |
+| --- | --- |
+| 现象 | 手机 MQTTX 反复掉线，发送时提示 `Client not connected`；第三次仿真 5 分钟内 ESP32 一条命令都没收到 |
+| 证据 | MQTTX 弹出 `The Broker has actively disconnected, Reason: Session taken over (Code: 142)`（`screenshots/mqttx/fault_clientid_session_taken_over_1/2.png`）；ESP32 串口同期一直在线且无 `Message arrived`（`screenshots/wokwi/serial_logs/run3_no_command_mqttx_kicked.txt`） |
+| 原因 | 另一个客户端（另一标签页 / 设备上的 MQTTX）使用了同一个 Client ID `mqttx-2022030518`。MQTT 规定同一 Client ID 只能有一个会话，新连接会接管会话并踢掉旧连接，两端自动重连后互相挤掉。ESP32 使用 `esp32-2022030518`，未受影响 |
+| 修复 | 关闭重复的客户端，并把手机端 Client ID 改为唯一的 `mqttx-2022030518-m` 后重新连接 |
+
+**故障记录二（代码演示：Topic 写错一个层级）**
 
 制造方法：把 `src/main.cpp` 中的 `#define FAULT_DEMO 0` 改为 `1`，订阅 Topic 变为 `iot/lesson7/2022030518/rgb/set`（缺少 `esp32` 层级）。该版本同样可以编译通过，见 `build_logs/build_fault_demo_topic.txt`。
 
@@ -119,10 +130,11 @@ screenshots/wokwi/       Wokwi 截图（见截图清单.md）
 | 个人化配置 | Topic 含学号，两个 Client ID 不同 |
 | 工程编译 | `pio run` 输出 `[SUCCESS]`，生成 `firmware.bin`（见 `build_logs/build_success.txt`；RAM 14.4%，Flash 73.9%） |
 | 命令逻辑 | 电脑端单元测试全部通过（`build_logs/host_unit_test.txt`） |
-| 电位器上报 / RGB 控制 / 隔离 | 需在 Wokwi + MQTTX 中实测并截图，见 `screenshots/*/截图清单.md` |
+| Wokwi 仿真 | wokwi-cli v0.29.1 实际运行 3 次：启动、MQTT 连接、电位器三组数据、RED/GREEN 控制已实测 |
+| 未完成项 | BLUE/WHITE/OFF/非法命令的仿真实测、跨学号隔离实测（免费版单次仿真限 5 分钟 + MQTTX Client ID 冲突） |
 
 ## 运行步骤
 
 1. VS Code 打开 `esp32_mqtt/`，PlatformIO: Build。
 2. `F1 → Wokwi: Start Simulator`（WiFi 为 `Wokwi-GUEST`，代码中已配置）。
-3. MQTTX 按第二部分连接并订阅，按第三到五部分测试，并按截图清单截图。
+3. MQTTX 按第二部分连接并订阅，按第三到五部分测试。
