@@ -1,0 +1,151 @@
+07:04:58 Wokwi CLI v0.29.1 (0aa185144b92)
+07:04:58 Connected to Wokwi Simulation API 1.0.0-20261023-g2434d687
+07:05:00 Starting simulation...
+07:05:01 ets Jul 29 2019 12:21:46
+07:05:01 
+07:05:01 rst:0x1 (POWERON_RESET),boot:0x13 (SPI_FAST_FLASH_BOOT)
+07:05:01 configsip: 0, SPIWP:0xee
+07:05:01 clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+07:05:01 mode:DIO, clock div:2
+07:05:01 load:0x3fff0030,len:1156
+07:05:01 load:0x40078000,len:11456
+07:05:01 ho 0 tail 12 room 4
+07:05:01 load:0x40080400,len:2972
+07:05:01 entry 0x400805dc
+07:05:03 
+07:05:03 Device ID : esp32-2022030518
+07:05:03 Pot topic : iot/lesson7/esp32/2022030518/pot
+07:05:03 RGB topic : iot/lesson7/esp32/2022030518/rgb/set
+07:05:05 Connecting to WiFi Wokwi-GUEST.....
+07:05:06 WiFi connected, IP: 10.13.37.2
+07:05:06 Connecting to MQTT broker.emqx.io:1883 as esp32-2022030518 ... MQTT connected
+07:05:06 Status published: iot/lesson7/esp32/2022030518/status = online (retain)
+07:05:06 Subscribe iot/lesson7/esp32/2022030518/rgb/set (QoS 0): OK
+07:05:06 [rgb run] Expected text matched: "rgb/set (QoS 0): OK"
+07:05:06 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:05:09 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:05:12 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:05:15 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:05:18 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:05:21 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:05:23 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:05:26 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:05:28 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:05:31 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:05:34 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:05:36 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:05:39 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:05:41 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:05:44 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:05:46 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:05:49 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:05:51 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:05:54 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:05:57 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:06:00 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:06:03 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:06:05 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:06:08 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:06:11 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:06:13 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:06:16 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:06:19 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:06:22 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:06:24 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:06:27 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:06:28 Message arrived [iot/lesson7/esp32/2022030518/rgb/set] (7 bytes): RED
+07:06:28 
+07:06:28 
+07:06:28  
+07:06:28 Command 
+07:06:28 [rgb run] Expected text matched: "Command "
+07:06:28 [rgb run] delay 300ms
+07:06:28 accepted: RED -> R=1 G=0 B=0
+07:06:30 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:06:33 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:06:35 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:06:38 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:06:41 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:06:44 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:06:46 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:06:49 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:06:51 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:06:54 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:06:57 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:07:00 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:07:02 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:07:05 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:07:08 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:07:10 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:07:13 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:07:16 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:07:18 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:07:21 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:07:24 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:07:26 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:07:29 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:07:32 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:07:35 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:07:37 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:07:40 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:07:43 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:07:45 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:07:48 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:07:50 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:07:53 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:07:55 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:07:58 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:08:00 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:08:03 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:08:06 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:08:08 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:08:11 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:08:14 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:08:17 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:08:19 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:08:22 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:08:25 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:08:27 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:08:30 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:08:33 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:08:36 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:08:38 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:08:41 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:08:44 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:08:46 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:08:49 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:08:52 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:08:55 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:08:58 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:09:00 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:09:03 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:09:05 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:09:08 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:09:11 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:09:13 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:09:16 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:09:18 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:09:21 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:09:23 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:09:26 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:09:28 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:09:31 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:09:33 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:09:36 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:09:39 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:09:41 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:09:42 Message arrived [iot/lesson7/esp32/2022030518/rgb/set] (8 bytes): 
+07:09:42 GREEN
+07:09:42  
+07:09:42 Command 
+07:09:42 [rgb run] Expected text matched: "Command "
+07:09:42 [rgb run] delay 300ms
+07:09:42 accepted: GREEN -> R=0 G=1 B=0
+07:09:44 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:09:46 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:09:49 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:09:52 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:09:55 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:09:58 Publish sent (QoS 0) iot/lesson7/esp32/2022030518/pot -> {"raw":2050,"percent":50}
+07:09:58 API Error: Connection timed out after 5 minutes. Upgrade your plan at https://wokwi.com/pricing for a longer timeout.
+exit
