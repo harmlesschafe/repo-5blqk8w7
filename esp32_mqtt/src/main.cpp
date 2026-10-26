@@ -12,7 +12,7 @@
 #include "rgb_command.h"
 
 // ---------------- 个人化配置 ----------------
-#define STUDENT_ID "20260101"  // TODO: 替换为本人完整学号
+#define STUDENT_ID "2022030518"  // 本人完整学号
 
 #define TOPIC_ROOT "iot/lesson7/esp32/" STUDENT_ID
 const char *TOPIC_POT    = TOPIC_ROOT "/pot";

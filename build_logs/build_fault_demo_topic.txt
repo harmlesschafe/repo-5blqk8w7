@@ -27,10 +27,10 @@ Retrieving maximum program size .pio/build/esp32dev/firmware.elf
 Checking size .pio/build/esp32dev/firmware.elf
 Advanced Memory Usage is available via "PlatformIO Home > Project Inspect"
 RAM:   [=         ]  14.4% (used 47208 bytes from 327680 bytes)
-Flash: [=======   ]  73.9% (used 968032 bytes from 1310720 bytes)
+Flash: [=======   ]  73.9% (used 968048 bytes from 1310720 bytes)
 Building .pio/build/esp32dev/firmware.bin
 esptool v5.4.0
 Creating ESP32 image...
 Merged 3 ELF sections.
 Successfully created ESP32 image.
-========================= [SUCCESS] Took 5.46 seconds =========================
+========================= [SUCCESS] Took 5.50 seconds =========================

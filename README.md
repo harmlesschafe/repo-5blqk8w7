@@ -1,6 +1,6 @@
 # 第七次课 ESP32 与 MQTT 双向通信练习
 
-> 学号：20260101（示例学号，运行 `./personalize.sh 学号 姓名 班级` 一键替换）
+> 学号：2022030518　姓名：姚佳
 
 电位器 JSON 上报 → MQTTX 订阅；MQTTX 发布命令 → ESP32 控制共阴极 RGB LED；附 Topic 隔离、故障排查与选做 status 主题。
 
@@ -26,7 +26,7 @@ screenshots/wokwi/       Wokwi 截图（见截图清单.md）
 | Publisher | ESP32（发布 pot）、MQTTX（发布 rgb/set） | 把消息发到某个 Topic |
 | Subscriber | MQTTX（订阅 pot）、ESP32（订阅 rgb/set） | 接收所订阅 Topic 上的消息 |
 | Broker | broker.emqx.io:1883 | 负责按 Topic 转发，发布者和订阅者互不直连 |
-| Topic | `iot/lesson7/esp32/20260101/pot` 等 | 分层地址，含学号保证不同同学互相隔离 |
+| Topic | `iot/lesson7/esp32/2022030518/pot` 等 | 分层地址，含学号保证不同同学互相隔离 |
 | Message | `{"raw":2048,"percent":50}`、`RED` | 实际载荷（Payload） |
 | QoS | 0 | “最多一次”，不确认、不重发 |
 
@@ -34,11 +34,11 @@ screenshots/wokwi/       Wokwi 截图（见截图清单.md）
 
 | 配置项 | 值 |
 | --- | --- |
-| 电位器 Topic | `iot/lesson7/esp32/20260101/pot` |
-| RGB 控制 Topic | `iot/lesson7/esp32/20260101/rgb/set` |
-| status Topic（选做） | `iot/lesson7/esp32/20260101/status` |
-| ESP32 Client ID | `esp32-20260101` |
-| MQTTX Client ID | `mqttx-20260101` |
+| 电位器 Topic | `iot/lesson7/esp32/2022030518/pot` |
+| RGB 控制 Topic | `iot/lesson7/esp32/2022030518/rgb/set` |
+| status Topic（选做） | `iot/lesson7/esp32/2022030518/status` |
+| ESP32 Client ID | `esp32-2022030518` |
+| MQTTX Client ID | `mqttx-2022030518` |
 
 代码中只需修改 `src/main.cpp` 的 `#define STUDENT_ID`，三个 Topic 与 Client ID 由宏自动拼接，避免手抄出错。
 
@@ -48,9 +48,9 @@ screenshots/wokwi/       Wokwi 截图（见截图清单.md）
 
 | 检查项 | 操作 | 结果 |
 | --- | --- | --- |
-| Broker 连接 | Host broker.emqx.io，Port 1883，用户名/密码留空，Client ID mqttx-20260101 | Connected |
-| Topic 订阅 | 订阅 `iot/lesson7/esp32/20260101/pot`，QoS 0 | 订阅成功 |
-| 链路自测 | 向该 Topic 发布 Plaintext `hello-20260101` | 订阅窗口收到同一条消息 |
+| Broker 连接 | Host broker.emqx.io，Port 1883，用户名/密码留空，Client ID mqttx-2022030518 | Connected |
+| Topic 订阅 | 订阅 `iot/lesson7/esp32/2022030518/pot`，QoS 0 | 订阅成功 |
+| 链路自测 | 向该 Topic 发布 Plaintext `hello-2022030518` | 订阅窗口收到同一条消息 |
 
 ## 四、第三部分 电位器 JSON 上报
 
@@ -70,7 +70,7 @@ screenshots/wokwi/       Wokwi 截图（见截图清单.md）
 
 ## 五、第四部分 RGB LED 远程控制
 
-向 `iot/lesson7/esp32/20260101/rgb/set` 发布 Plaintext，QoS 0，Retain 关闭。回调按 `length` 读取 Payload（Payload 不以 `\0` 结尾），去掉首尾空白并转换为大写后比较；未知命令保持原状态并输出 `Command rejected`。
+向 `iot/lesson7/esp32/2022030518/rgb/set` 发布 Plaintext，QoS 0，Retain 关闭。回调按 `length` 读取 Payload（Payload 不以 `\0` 结尾），去掉首尾空白并转换为大写后比较；未知命令保持原状态并输出 `Command rejected`。
 
 | 测试内容 | 预期结果 | 实际结果 |
 | --- | --- | --- |
@@ -89,13 +89,13 @@ screenshots/wokwi/       Wokwi 截图（见截图清单.md）
 
 **故障记录（所选故障：Topic 写错一个层级）**
 
-制造方法：把 `src/main.cpp` 中的 `#define FAULT_DEMO 0` 改为 `1`，订阅 Topic 变为 `iot/lesson7/20260101/rgb/set`（缺少 `esp32` 层级）。该版本同样可以编译通过，见 `build_logs/build_fault_demo_topic.txt`。
+制造方法：把 `src/main.cpp` 中的 `#define FAULT_DEMO 0` 改为 `1`，订阅 Topic 变为 `iot/lesson7/2022030518/rgb/set`（缺少 `esp32` 层级）。该版本同样可以编译通过，见 `build_logs/build_fault_demo_topic.txt`。
 
 | 项目 | 记录 |
 | --- | --- |
 | 现象 | MQTTX 发送记录中能看到 RED/BLUE 已发出，但 RGB LED 不变化；电位器数据仍正常上报 |
-| 日志 | 串口显示 `Subscribe iot/lesson7/20260101/rgb/set (QoS 0): OK`，发送命令后没有任何 `Message arrived` 输出 |
-| 原因 | 订阅时 SUBACK 只表示 Broker 接受了订阅请求，并不校验 Topic 是否“正确”。逐层比较发布 Topic `iot/lesson7/esp32/20260101/rgb/set` 与订阅 Topic `iot/lesson7/20260101/rgb/set`，第 3 层 `esp32` 缺失，两者不匹配，Broker 不转发 |
+| 日志 | 串口显示 `Subscribe iot/lesson7/2022030518/rgb/set (QoS 0): OK`，发送命令后没有任何 `Message arrived` 输出 |
+| 原因 | 订阅时 SUBACK 只表示 Broker 接受了订阅请求，并不校验 Topic 是否“正确”。逐层比较发布 Topic `iot/lesson7/esp32/2022030518/rgb/set` 与订阅 Topic `iot/lesson7/2022030518/rgb/set`，第 3 层 `esp32` 缺失，两者不匹配，Broker 不转发 |
 | 修复 | 改回 `FAULT_DEMO 0`（订阅 `TOPIC_RGB`），重新 Build 并启动仿真；串口订阅 Topic 与 MQTTX 发布 Topic 完全一致，发送 RED 后立即出现 `Command accepted: RED`，LED 变红。已恢复正确配置 |
 
 其他故障的预防措施也已写在代码里：

@@ -52,10 +52,10 @@ Compiling .pio/build/esp32dev/FrameworkArduino/Esp.cpp.o
 Compiling .pio/build/esp32dev/FrameworkArduino/FirmwareMSC.cpp.o
 Compiling .pio/build/esp32dev/FrameworkArduino/FunctionalInterrupt.cpp.o
 Compiling .pio/build/esp32dev/FrameworkArduino/HEXBuilder.cpp.o
-Compiling .pio/build/esp32dev/FrameworkArduino/HWCDC.cpp.o
-Compiling .pio/build/esp32dev/FrameworkArduino/HardwareSerial.cpp.o
 Archiving .pio/build/esp32dev/lib789/libWiFi.a
 Indexing .pio/build/esp32dev/lib789/libWiFi.a
+Compiling .pio/build/esp32dev/FrameworkArduino/HWCDC.cpp.o
+Compiling .pio/build/esp32dev/FrameworkArduino/HardwareSerial.cpp.o
 Compiling .pio/build/esp32dev/FrameworkArduino/HashBuilder.cpp.o
 Compiling .pio/build/esp32dev/FrameworkArduino/IPAddress.cpp.o
 Compiling .pio/build/esp32dev/FrameworkArduino/MD5Builder.cpp.o
@@ -103,8 +103,8 @@ Compiling .pio/build/esp32dev/FrameworkArduino/esp32-hal-uart.c.o
 Compiling .pio/build/esp32dev/FrameworkArduino/firmware_msc_fat.c.o
 Compiling .pio/build/esp32dev/FrameworkArduino/freertos_stats.cpp.o
 Compiling .pio/build/esp32dev/FrameworkArduino/idf_openthread_mpool_wrapper.c.o
-Compiling .pio/build/esp32dev/FrameworkArduino/libb64/cencode.c.o
 Compiling .pio/build/esp32dev/FrameworkArduino/libb64/cdecode.c.o
+Compiling .pio/build/esp32dev/FrameworkArduino/libb64/cencode.c.o
 Compiling .pio/build/esp32dev/FrameworkArduino/main.cpp.o
 Compiling .pio/build/esp32dev/FrameworkArduino/stdlib_noniso.c.o
 Compiling .pio/build/esp32dev/FrameworkArduino/wiring_pulse.c.o
@@ -116,10 +116,10 @@ Retrieving maximum program size .pio/build/esp32dev/firmware.elf
 Checking size .pio/build/esp32dev/firmware.elf
 Advanced Memory Usage is available via "PlatformIO Home > Project Inspect"
 RAM:   [=         ]  14.4% (used 47208 bytes from 327680 bytes)
-Flash: [=======   ]  73.9% (used 968004 bytes from 1310720 bytes)
+Flash: [=======   ]  73.9% (used 968020 bytes from 1310720 bytes)
 Building .pio/build/esp32dev/firmware.bin
 esptool v5.4.0
 Creating ESP32 image...
 Merged 3 ELF sections.
 Successfully created ESP32 image.
-========================= [SUCCESS] Took 10.56 seconds =========================
+========================= [SUCCESS] Took 11.62 seconds =========================
