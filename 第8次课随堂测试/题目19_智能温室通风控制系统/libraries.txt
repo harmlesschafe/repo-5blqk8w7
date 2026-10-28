@@ -1,0 +1,6 @@
+# Wokwi 库清单
+Adafruit SSD1306
+Adafruit GFX Library
+DHT sensor library
+Adafruit Unified Sensor
+Servo

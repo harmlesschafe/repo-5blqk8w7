@@ -1,0 +1,301 @@
+{
+  "version": 1,
+  "author": "",
+  "editor": "wokwi",
+  "parts": [
+    {
+      "type": "wokwi-arduino-uno",
+      "id": "uno",
+      "top": 0,
+      "left": 0,
+      "attrs": {}
+    },
+    {
+      "type": "wokwi-dht22",
+      "id": "dht1",
+      "top": -225,
+      "left": 10,
+      "attrs": {
+        "temperature": "24",
+        "humidity": "40"
+      }
+    },
+    {
+      "type": "wokwi-rgb-led",
+      "id": "rgb1",
+      "top": -235,
+      "left": 180,
+      "attrs": {
+        "common": "cathode"
+      }
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "r1",
+      "top": -141.1,
+      "left": 158.94,
+      "rotate": 90,
+      "attrs": {
+        "value": "220"
+      }
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "r2",
+      "top": -141.1,
+      "left": 176.84,
+      "rotate": 90,
+      "attrs": {
+        "value": "220"
+      }
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "r3",
+      "top": -141.1,
+      "left": 200.44,
+      "rotate": 90,
+      "attrs": {
+        "value": "220"
+      }
+    },
+    {
+      "type": "wokwi-pushbutton",
+      "id": "btn1",
+      "top": -120,
+      "left": 285,
+      "attrs": {
+        "color": "green"
+      }
+    },
+    {
+      "type": "wokwi-servo",
+      "id": "servo1",
+      "top": -140,
+      "left": -250,
+      "rotate": 180,
+      "attrs": {}
+    },
+    {
+      "type": "wokwi-potentiometer",
+      "id": "pot1",
+      "top": 250,
+      "left": -10,
+      "rotate": 180,
+      "attrs": {
+        "value": "512"
+      }
+    },
+    {
+      "type": "board-ssd1306",
+      "id": "oled1",
+      "top": 245,
+      "left": 175,
+      "attrs": {
+        "i2cAddress": "0x3c"
+      }
+    }
+  ],
+  "connections": [
+    [
+      "dht1:SDA",
+      "uno:7",
+      "orange",
+      [
+        "v80.1",
+        "h154.5"
+      ]
+    ],
+    [
+      "dht1:GND",
+      "uno:GND.1",
+      "black",
+      [
+        "v50.1",
+        "h61.7"
+      ]
+    ],
+    [
+      "dht1:VCC",
+      "uno:5V",
+      "red",
+      [
+        "v35.1",
+        "h-75",
+        "v297",
+        "h210"
+      ]
+    ],
+    [
+      "rgb1:R",
+      "r1:1",
+      "red",
+      []
+    ],
+    [
+      "rgb1:G",
+      "r2:1",
+      "green",
+      []
+    ],
+    [
+      "rgb1:B",
+      "r3:1",
+      "blue",
+      [
+        "v10",
+        "h14.3"
+      ]
+    ],
+    [
+      "r1:2",
+      "uno:6",
+      "red",
+      [
+        "v36.2",
+        "h10"
+      ]
+    ],
+    [
+      "r2:2",
+      "uno:5",
+      "green",
+      [
+        "v51.2",
+        "h1.6"
+      ]
+    ],
+    [
+      "r3:2",
+      "uno:3",
+      "blue",
+      [
+        "v66.2",
+        "h-3"
+      ]
+    ],
+    [
+      "rgb1:COM",
+      "uno:GND.1",
+      "black",
+      [
+        "v8",
+        "h-82.5"
+      ]
+    ],
+    [
+      "btn1:1.l",
+      "uno:2",
+      "violet",
+      [
+        "h-23",
+        "v85",
+        "h-25.5"
+      ]
+    ],
+    [
+      "btn1:2.r",
+      "uno:GND.1",
+      "black",
+      [
+        "h20",
+        "v-174",
+        "h-256.5"
+      ]
+    ],
+    [
+      "servo1:PWM",
+      "uno:9",
+      "orange",
+      [
+        "h51.92",
+        "v-160.53",
+        "h191"
+      ]
+    ],
+    [
+      "servo1:V+",
+      "uno:5V",
+      "red",
+      [
+        "h29.92",
+        "v301.97",
+        "h210"
+      ]
+    ],
+    [
+      "servo1:GND",
+      "uno:GND.2",
+      "black",
+      [
+        "h17.92",
+        "v304.47",
+        "h231.5"
+      ]
+    ],
+    [
+      "pot1:VCC",
+      "uno:5V",
+      "red",
+      [
+        "v-35.08",
+        "h143.42"
+      ]
+    ],
+    [
+      "pot1:GND",
+      "uno:GND.2",
+      "black",
+      [
+        "v-23.08",
+        "h132.92"
+      ]
+    ],
+    [
+      "pot1:SIG",
+      "uno:A0",
+      "green",
+      [
+        "v-47.08",
+        "h181.42"
+      ]
+    ],
+    [
+      "oled1:GND",
+      "uno:GND.3",
+      "black",
+      [
+        "v-36.46",
+        "h-34.17"
+      ]
+    ],
+    [
+      "oled1:VCC",
+      "uno:5V",
+      "red",
+      [
+        "v-29.46",
+        "h-62.62"
+      ]
+    ],
+    [
+      "oled1:SCL",
+      "uno:A5",
+      "yellow",
+      [
+        "v-46.46",
+        "h23.43"
+      ]
+    ],
+    [
+      "oled1:SDA",
+      "uno:A4",
+      "blue",
+      [
+        "v-51.46",
+        "h4.1"
+      ]
+    ]
+  ],
+  "dependencies": {}
+}

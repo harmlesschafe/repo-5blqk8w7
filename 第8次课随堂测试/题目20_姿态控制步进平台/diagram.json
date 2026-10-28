@@ -1,0 +1,266 @@
+{
+  "version": 1,
+  "author": "",
+  "editor": "wokwi",
+  "parts": [
+    {
+      "type": "wokwi-arduino-uno",
+      "id": "uno",
+      "top": 0,
+      "left": 0,
+      "attrs": {}
+    },
+    {
+      "type": "wokwi-mpu6050",
+      "id": "imu1",
+      "top": -140,
+      "left": -40,
+      "rotate": 180,
+      "attrs": {}
+    },
+    {
+      "type": "wokwi-pushbutton",
+      "id": "btn1",
+      "top": -215,
+      "left": 35,
+      "attrs": {
+        "color": "green"
+      }
+    },
+    {
+      "type": "wokwi-buzzer",
+      "id": "bz1",
+      "top": -245,
+      "left": 152,
+      "attrs": {
+        "volume": "0.1"
+      }
+    },
+    {
+      "type": "wokwi-a4988",
+      "id": "drv1",
+      "top": -130,
+      "left": 290,
+      "attrs": {}
+    },
+    {
+      "type": "wokwi-stepper-motor",
+      "id": "stepper1",
+      "top": -320,
+      "left": 300,
+      "attrs": {
+        "size": "17",
+        "arrow": "orange",
+        "display": "angle"
+      }
+    },
+    {
+      "type": "board-ssd1306",
+      "id": "oled1",
+      "top": 260,
+      "left": 175,
+      "attrs": {
+        "i2cAddress": "0x3c"
+      }
+    }
+  ],
+  "connections": [
+    [
+      "imu1:SCL",
+      "uno:A5.2",
+      "yellow",
+      [
+        "v54.56",
+        "h100.58"
+      ]
+    ],
+    [
+      "imu1:SDA",
+      "uno:A4.2",
+      "blue",
+      [
+        "v39.56",
+        "h100.97"
+      ]
+    ],
+    [
+      "imu1:VCC",
+      "uno:5V",
+      "red",
+      [
+        "v14.56",
+        "h-17.22",
+        "v292",
+        "h210"
+      ]
+    ],
+    [
+      "imu1:GND",
+      "uno:GND.2",
+      "black",
+      [
+        "v26.56",
+        "h-38.83",
+        "v292",
+        "h231.5"
+      ]
+    ],
+    [
+      "btn1:1.r",
+      "uno:12",
+      "violet",
+      [
+        "h32.5"
+      ]
+    ],
+    [
+      "btn1:2.r",
+      "uno:GND.1",
+      "black",
+      [
+        "h13.5"
+      ]
+    ],
+    [
+      "bz1:2",
+      "uno:7",
+      "red",
+      []
+    ],
+    [
+      "bz1:1",
+      "uno:GND.1",
+      "black",
+      [
+        "v61",
+        "h-63.5"
+      ]
+    ],
+    [
+      "drv1:ENABLE",
+      "uno:5",
+      "gray",
+      [
+        "h-86.8"
+      ]
+    ],
+    [
+      "drv1:STEP",
+      "uno:4",
+      "orange",
+      [
+        "h-77.3"
+      ]
+    ],
+    [
+      "drv1:DIR",
+      "uno:3",
+      "purple",
+      [
+        "h-67.8"
+      ]
+    ],
+    [
+      "drv1:RESET",
+      "drv1:SLEEP",
+      "green",
+      [
+        "h-12.8",
+        "v9.6"
+      ]
+    ],
+    [
+      "drv1:2B",
+      "stepper1:A-",
+      "green",
+      [
+        "h24.12"
+      ]
+    ],
+    [
+      "drv1:2A",
+      "stepper1:A+",
+      "black",
+      [
+        "h33.72"
+      ]
+    ],
+    [
+      "drv1:1A",
+      "stepper1:B+",
+      "blue",
+      [
+        "h43.32"
+      ]
+    ],
+    [
+      "drv1:1B",
+      "stepper1:B-",
+      "red",
+      [
+        "h52.93"
+      ]
+    ],
+    [
+      "drv1:VDD",
+      "uno:5V",
+      "red",
+      [
+        "h97.35",
+        "v439.68",
+        "h-490",
+        "v-150",
+        "h210"
+      ]
+    ],
+    [
+      "drv1:GND.1",
+      "uno:GND.2",
+      "black",
+      [
+        "h87.35",
+        "v418.08",
+        "h-492",
+        "v-126",
+        "h231.5"
+      ]
+    ],
+    [
+      "oled1:GND",
+      "uno:GND.3",
+      "black",
+      [
+        "v-54.46",
+        "h-34.17"
+      ]
+    ],
+    [
+      "oled1:VCC",
+      "uno:5V",
+      "red",
+      [
+        "v-44.46",
+        "h-62.62"
+      ]
+    ],
+    [
+      "oled1:SCL",
+      "uno:A5",
+      "yellow",
+      [
+        "v-64.46",
+        "h23.43"
+      ]
+    ],
+    [
+      "oled1:SDA",
+      "uno:A4",
+      "blue",
+      [
+        "v-59.46",
+        "h4.1"
+      ]
+    ]
+  ],
+  "dependencies": {}
+}
