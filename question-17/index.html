@@ -74,6 +74,8 @@
   .key .k-ink { border-color: var(--ink); }
   .key .k-ghost { border-top: 2px dashed var(--ghost); }
   .key .k-gamma { border-color: var(--gamma); }
+  .key i.k-bad { width: 14px; height: 11px; border: 1px solid var(--bad); background: var(--bad-soft); }
+  .hud .bad { color: var(--bad); font-family: var(--font-body); font-weight: 500; }
 
   .panel { display: grid; gap: 16px; min-width: 0; }
   .group { display: grid; gap: 10px; padding-bottom: 16px; border-bottom: 1px solid var(--rule); }
@@ -154,6 +156,7 @@
         <span><span class="var">l</span><sub>CB</sub> <b id="h-cb">—</b></span>
         <span>α <b id="h-a">—</b></span>
         <span class="g">γ <b id="h-g">—</b></span>
+        <span id="h-m" class="bad" hidden>曲柄来回摆，转不了整周</span>
       </div>
       <svg id="mech" viewBox="0 0 680 620" role="img" aria-label="偏置导杆机构运动简图：曲柄 AB 绕 A 转动，导杆与 CD 固连绕 C 转动，绿色箭头为滑块对导杆的力 F 和导杆上 B 点的速度">
         <defs>
@@ -165,6 +168,7 @@
         </defs>
         <rect width="680" height="620" fill="url(#grid)"/>
         <g id="g-base"></g>
+        <g id="g-zone"></g>
         <g id="g-ghost"></g>
         <g id="g-tri"></g>
         <g id="g-mech"></g>
@@ -175,6 +179,7 @@
         <span class="key"><i class="k-ink"></i>机架、导杆、滑块</span>
         <span class="key"><i class="k-gamma"></i>F、v<sub>B4</sub> 与 α、γ</span>
         <span class="key"><i class="k-ghost"></i>γ<sub>min</sub> 位置</span>
+        <span class="key"><i class="k-bad"></i>曲柄转不进的扇形 / B 进不去的圆</span>
       </figcaption>
     </figure>
 
@@ -226,6 +231,7 @@
         </dl>
         <p id="r-why" class="why">—</p>
         <dl class="readout">
+          <dt>曲柄运动</dt><dd id="r-motion" class="text">—</dd>
           <dt>最小传动角 γ<sub>min</sub></dt><dd id="r-gmin" class="hl">—</dd>
           <dt>出现位置</dt><dd id="r-where" class="text">—</dd>
         </dl>
@@ -244,7 +250,7 @@
         <h2>参数（<span class="var">l</span><sub>AC</sub> = 40 不变）</h2>
         <div class="slider">
           <label for="e">偏距 <span><span class="var">e</span> = <output id="e-out" for="e">4</output></span></label>
-          <input id="e" type="range" min="0" max="12" step="0.5" value="4">
+          <input id="e" type="range" min="0" max="16" step="0.5" value="4">
         </div>
         <div class="slider">
           <label for="r">曲柄长 <span><span class="var">l</span><sub>AB</sub> = <output id="r-out" for="r">20</output></span></label>
@@ -256,6 +262,7 @@
           <button class="btn small" type="button" data-preset="rot">e = 0，l<sub>AB</sub> = 48</button>
         </div>
         <p class="hint">第 (3) 问拖 <span class="var">l</span><sub>AB</sub> 越过 40 看导杆变成整周转动；第 (4) 问把 <span class="var">e</span> 拖到 0 看 γ 变成恒 90°。</p>
+        <p class="hint">只有 40 − <span class="var">e</span> &lt; <span class="var">l</span><sub>AB</sub> &lt; 40 + <span class="var">e</span> 时曲柄转不了整周，而且转不进的只是 AC 方向附近的一个窄扇形（红色），曲柄转三百多度后会倒回来。<span class="var">e</span> 越大扇形越宽。</p>
       </section>
     </aside>
   </main>
@@ -409,7 +416,7 @@
   }
 
   // ---------- layers ----------
-  const gBase = $('g-base'), gGhost = $('g-ghost'), gTri = $('g-tri'), gMech = $('g-mech'), gGam = $('g-gam');
+  const gBase = $('g-base'), gZone = $('g-zone'), gGhost = $('g-ghost'), gTri = $('g-tri'), gMech = $('g-mech'), gGam = $('g-gam');
 
   // frame AC (hatched, as in the figure), hinges A and C, ω1
   function buildBase() {
@@ -429,6 +436,29 @@
     el('path', { d: arcPath(A[0], A[1], R, a0, a1), fill: 'none', style: 'stroke: var(--crank)', 'stroke-width': 1.8, [state.dir > 0 ? 'marker-end' : 'marker-start']: 'url(#ah-crank)' }, gBase);
     const w = label(gBase, 'ω', '1', { class: 't-crank', 'font-size': 17 });
     place(w, A[0] + (R + px(16)) * Math.cos(130 * D) - px(14), A[1] + (R + px(16)) * Math.sin(130 * D) + px(2));
+  }
+
+  // half-width (deg) of the crank sector around the AC direction where l_CB < e; 0 if the crank can turn fully
+  function forbidHalf() {
+    const { r } = geo, e = rhoMin();
+    const c = (AC * AC + r * r - e * e) / (2 * AC * r);
+    return c >= 1 ? 0 : Math.acos(Math.max(-1, c)) / D;
+  }
+
+  // B's path (crank circle), D's path (circle of radius e about C) and, when it exists, the sector B cannot enter
+  function buildZone() {
+    gZone.replaceChildren();
+    const { r, e } = geo, bad = TYPE.key === 'bad';
+    el('circle', { cx: X(A[0]), cy: Y(A[1]), r: (r * S).toFixed(2), fill: 'none', style: 'stroke: var(--crank)', 'stroke-width': 1, 'stroke-dasharray': '4 5', opacity: 0.55 }, gZone);
+    if (e > 0.01) {
+      el('circle', { cx: X(0), cy: Y(0), r: (e * S).toFixed(2), style: bad ? 'stroke: var(--bad); fill: var(--bad-soft)' : 'stroke: var(--muted); fill: none', 'stroke-width': 1.2, 'stroke-dasharray': '3 3' }, gZone);
+    }
+    const h = forbidHalf();
+    if (bad && h > 0) {
+      const a0 = (PHI_MIN - h) * D, a1 = (PHI_MIN + h) * D;
+      const d = `M${pt(A[0], A[1])} L${pt(A[0] + r * Math.cos(a0), A[1] + r * Math.sin(a0))} A${(r * S).toFixed(2)} ${(r * S).toFixed(2)} 0 ${2 * h > 180 ? 1 : 0} 0 ${pt(A[0] + r * Math.cos(a1), A[1] + r * Math.sin(a1))} Z`;
+      el('path', { d, style: 'stroke: var(--bad); fill: var(--bad-soft)', 'stroke-width': 1.4 }, gZone);
+    }
   }
 
   // γmin position (ghost)
@@ -552,6 +582,11 @@
       $('r-where').textContent = r < AC ? 'AB 与 AC 重叠共线（B 在 AC 上）' : 'AB 与 AC 共线（B 在 AC 延长线上）';
     }
     $('go-min').disabled = TYPE.key === 'bad';
+    const h = forbidHalf();
+    $('r-motion').textContent = TYPE.key === 'bad'
+      ? `来回摆动，摆角 ${(360 - 2 * h).toFixed(1)}°（AC 两侧各 ${h.toFixed(1)}° 转不进）`
+      : '整周转动';
+    $('h-m').hidden = TYPE.key !== 'bad';
   }
 
   // ---------- render ----------
@@ -650,7 +685,7 @@
     TYPE = classify();
     state.bounce = 1;
     fitView();
-    buildBase(); buildGhost(); buildChart(); refreshResults();
+    buildBase(); buildZone(); buildGhost(); buildChart(); refreshResults();
     state.phi = nearestFeasible(state.phi);
     render();
   }
