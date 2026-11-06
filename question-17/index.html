@@ -1,0 +1,728 @@
+<title>偏置导杆机构传动角</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;700&family=Noto+Serif+SC:wght@600;700&family=Noto+Serif:ital,wght@1,500&display=swap">
+<style>
+  /* Layout: drawing sheet on the left, instrument panel on the right; worked solution underneath; stacks under 900px */
+  :root {
+    --paper: #eef1f4;
+    --sheet: #fbfcfd;
+    --ink: #17202b;
+    --ink-2: #2f3a47;
+    --muted: #5c6776;
+    --rule: #d6dce3;
+    --grid: #e6eaef;
+    --chip: #e4e9ef;
+    --crank: #1d55c4;
+    --crank-soft: rgba(29, 85, 196, .12);
+    --on-accent: #ffffff;
+    --ghost: #a85f08;
+    --gamma: #1d7c52;
+    --gamma-soft: rgba(29, 124, 82, .12);
+    --bad: #b42318;
+    --bad-soft: rgba(180, 35, 24, .10);
+    --font-display: "Noto Serif SC", "Songti SC", "SimSun", serif;
+    --font-body: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+    --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+    --font-label: "Noto Serif", "Times New Roman", Times, serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #0e1318; --sheet: #141a21; --ink: #e2e8ef; --ink-2: #c3ccd6; --muted: #92a0b0;
+      --rule: #29333f; --grid: #1b232c; --chip: #222c37; --crank: #7da4ff; --crank-soft: rgba(125, 164, 255, .16);
+      --on-accent: #0b1220; --ghost: #e3a14e; --gamma: #52c48f; --gamma-soft: rgba(82, 196, 143, .14);
+      --bad: #f97066; --bad-soft: rgba(249, 112, 102, .14); color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #0e1318; --sheet: #141a21; --ink: #e2e8ef; --ink-2: #c3ccd6; --muted: #92a0b0;
+    --rule: #29333f; --grid: #1b232c; --chip: #222c37; --crank: #7da4ff; --crank-soft: rgba(125, 164, 255, .16);
+    --on-accent: #0b1220; --ghost: #e3a14e; --gamma: #52c48f; --gamma-soft: rgba(82, 196, 143, .14);
+    --bad: #f97066; --bad-soft: rgba(249, 112, 102, .14); color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  body { background: var(--paper); color: var(--ink); font-family: var(--font-body); font-size: 15px; line-height: 1.6; }
+  .wrap {
+    max-width: 1180px; margin: 0 auto; display: grid; gap: 22px;
+    padding-block: 26px 48px;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+  }
+
+  header { display: grid; gap: 6px; }
+  .eyebrow { font-family: var(--font-mono); font-size: 12px; letter-spacing: .08em; color: var(--muted); margin: 0; }
+  h1 { font-family: var(--font-display); font-weight: 700; font-size: clamp(24px, 3.4vw, 34px); line-height: 1.25; letter-spacing: .03em; margin: 0; text-wrap: balance; }
+  .lede { margin: 0; max-width: 66ch; color: var(--ink-2); }
+  .lede b { font-weight: 500; }
+  .var { font-family: var(--font-label); font-style: italic; }
+  .nowrap { white-space: nowrap; }
+
+  .layout { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 22px; align-items: start; }
+  @media (max-width: 900px) { .layout { grid-template-columns: minmax(0, 1fr); } }
+
+  .stage { margin: 0; background: var(--sheet); border: 1px solid var(--rule); border-radius: 6px; overflow: hidden; min-width: 0; }
+  .hud { display: flex; flex-wrap: wrap; gap: 4px 18px; padding: 9px 14px; border-bottom: 1px solid var(--rule); font-family: var(--font-mono); font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .hud b { color: var(--ink); font-weight: 500; }
+  .hud .g b { color: var(--gamma); }
+  .stage svg { display: block; width: 100%; height: auto; max-width: 100%; }
+  figcaption { display: flex; flex-wrap: wrap; gap: 6px 18px; padding: 10px 14px; border-top: 1px solid var(--rule); font-size: 13px; color: var(--muted); }
+  .key { display: inline-flex; align-items: center; gap: 7px; }
+  .key i { display: inline-block; width: 20px; border-top: 3px solid; }
+  .key .k-crank { border-color: var(--crank); }
+  .key .k-ink { border-color: var(--ink); }
+  .key .k-ghost { border-top: 2px dashed var(--ghost); }
+  .key .k-gamma { border-color: var(--gamma); }
+
+  .panel { display: grid; gap: 16px; min-width: 0; }
+  .group { display: grid; gap: 10px; padding-bottom: 16px; border-bottom: 1px solid var(--rule); }
+  .group:last-child { border-bottom: 0; padding-bottom: 0; }
+  .group h2 { margin: 0; font-size: 12.5px; font-weight: 500; letter-spacing: .1em; color: var(--muted); }
+  .row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+  .row.between { justify-content: space-between; }
+
+  button { font: inherit; color: inherit; }
+  .btn { border: 1px solid var(--rule); background: var(--sheet); border-radius: 6px; padding: 6px 12px; cursor: pointer; font-size: 14px; line-height: 1.5; }
+  .btn:hover { border-color: var(--muted); }
+  .btn.primary { background: var(--crank); border-color: var(--crank); color: var(--on-accent); font-weight: 500; min-width: 92px; }
+  .btn.primary:hover { filter: brightness(1.08); }
+  .btn.small { padding: 4px 10px; font-size: 13px; }
+  :focus-visible { outline: 2px solid var(--crank); outline-offset: 2px; }
+  .seg { display: inline-flex; border: 1px solid var(--rule); border-radius: 6px; overflow: hidden; background: var(--sheet); }
+  .seg button { border: 0; background: transparent; padding: 6px 11px; cursor: pointer; font-size: 13px; color: var(--muted); }
+  .seg.mono button { font-family: var(--font-mono); }
+  .seg button + button { border-left: 1px solid var(--rule); }
+  .seg button[aria-pressed="true"] { background: var(--chip); color: var(--ink); font-weight: 500; }
+
+  .slider { display: grid; gap: 4px; }
+  .slider label { display: flex; justify-content: space-between; font-size: 13.5px; color: var(--muted); }
+  .slider output { font-family: var(--font-mono); color: var(--ink); font-variant-numeric: tabular-nums; }
+  input[type="range"] { width: 100%; margin: 0; accent-color: var(--crank); }
+  .hint { margin: 0; font-size: 12.5px; color: var(--muted); }
+
+  .readout { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 5px 14px; margin: 0; }
+  .readout dt { color: var(--muted); font-size: 13.5px; }
+  .readout dd { margin: 0; text-align: right; font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-size: 14px; min-width: 0; }
+  .readout dd.text { font-family: var(--font-body); font-size: 13.5px; }
+  .readout .hl { color: var(--gamma); font-weight: 500; }
+  .pill { display: inline-block; padding: 1px 10px; border-radius: 999px; font-size: 13px; font-family: var(--font-body); }
+  .pill.osc { background: var(--crank-soft); color: var(--crank); }
+  .pill.rot { background: var(--gamma-soft); color: var(--gamma); }
+  .pill.edge { border: 1px solid var(--ghost); color: var(--ghost); }
+  .pill.bad { background: var(--bad-soft); color: var(--bad); }
+  .why { margin: 0; font-size: 12.5px; color: var(--muted); text-align: right; }
+
+  .chart { width: 100%; height: auto; display: block; }
+  .chart text { font-family: var(--font-mono); font-size: 10px; fill: var(--muted); }
+
+  .toggles { display: flex; flex-wrap: wrap; gap: 8px; }
+  .toggle { display: inline-flex; align-items: center; gap: 6px; padding: 4px 11px; border: 1px solid var(--rule); border-radius: 999px; cursor: pointer; font-size: 13.5px; user-select: none; background: var(--sheet); }
+  .toggle input { accent-color: var(--crank); margin: 0; }
+
+  .solution { display: grid; gap: 14px; border-top: 1px solid var(--rule); padding-top: 20px; }
+  .solution > h2 { font-family: var(--font-display); font-weight: 600; font-size: 20px; margin: 0; letter-spacing: .03em; }
+  .steps { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px 28px; }
+  @media (max-width: 900px) { .steps { grid-template-columns: minmax(0, 1fr); } }
+  .step { min-width: 0; display: grid; gap: 6px; align-content: start; }
+  .step h3 { font-family: var(--font-display); font-weight: 600; font-size: 16px; margin: 0; letter-spacing: .02em; }
+  .step h3 .q { font-family: var(--font-mono); font-weight: 500; color: var(--ghost); margin-right: 6px; }
+  .step p { margin: 0; font-size: 14px; color: var(--ink-2); max-width: 62ch; }
+  .formula { font-family: var(--font-label); font-style: italic; font-size: 16px; color: var(--ink); background: var(--sheet); border: 1px solid var(--rule); border-radius: 6px; padding: 6px 12px; justify-self: start; max-width: 100%; overflow-x: auto; white-space: nowrap; }
+  .formula .up { font-style: normal; font-family: var(--font-body); font-size: 14px; color: var(--muted); }
+  .ans { color: var(--gamma); font-weight: 500; }
+
+  /* drawing */
+  #mech text { font-family: var(--font-label); font-style: italic; fill: var(--ink); }
+  #mech .t-ghost { fill: var(--ghost); }
+  #mech .t-gamma { fill: var(--gamma); }
+  #mech .t-muted { fill: var(--muted); }
+  #mech .t-crank { fill: var(--crank); }
+</style>
+
+<div class="wrap">
+  <header>
+    <p class="eyebrow">第 17 题 · 偏置导杆机构 · 传动角</p>
+    <h1>偏置导杆机构的传动角</h1>
+    <p class="lede">曲柄 <span class="var">AB</span> 为原动件，滑块在 <span class="var">B</span> 处与曲柄铰接并沿导杆滑动；导杆与短杆 <span class="var">CD</span> 固连成直角，绕 <span class="var">C</span> 转动，<span class="var">C</span> 到导杆的距离为偏距 <span class="var">e</span>。尺寸按题图比例量取：<b class="nowrap"><span class="var">l</span><sub>AB</sub> : <span class="var">l</span><sub>AC</sub> : <span class="var">e</span> ≈ 20 : 40 : 4</b>。题目没有给转向，默认逆时针，可以切换。</p>
+  </header>
+
+  <main class="layout">
+    <figure class="stage">
+      <div class="hud" aria-live="off">
+        <span>φ <b id="h-phi">—</b></span>
+        <span><span class="var">l</span><sub>CB</sub> <b id="h-cb">—</b></span>
+        <span>α <b id="h-a">—</b></span>
+        <span class="g">γ <b id="h-g">—</b></span>
+      </div>
+      <svg id="mech" viewBox="0 0 680 620" role="img" aria-label="偏置导杆机构运动简图：曲柄 AB 绕 A 转动，导杆与 CD 固连绕 C 转动，绿色箭头为滑块对导杆的力 F 和导杆上 B 点的速度">
+        <defs>
+          <pattern id="grid" width="30" height="30" patternUnits="userSpaceOnUse">
+            <path d="M30 0H0V30" fill="none" style="stroke: var(--grid)" stroke-width="1"/>
+          </pattern>
+          <marker id="ah-crank" viewBox="0 0 10 10" refX="8" refY="5" markerUnits="userSpaceOnUse" markerWidth="12" markerHeight="12" orient="auto-start-reverse"><path d="M0 1 L10 5 L0 9 z" style="fill: var(--crank)"/></marker>
+          <marker id="ah-gamma" viewBox="0 0 10 10" refX="8" refY="5" markerUnits="userSpaceOnUse" markerWidth="12" markerHeight="12" orient="auto-start-reverse"><path d="M0 1 L10 5 L0 9 z" style="fill: var(--gamma)"/></marker>
+        </defs>
+        <rect width="680" height="620" fill="url(#grid)"/>
+        <g id="g-base"></g>
+        <g id="g-ghost"></g>
+        <g id="g-tri"></g>
+        <g id="g-mech"></g>
+        <g id="g-gam"></g>
+      </svg>
+      <figcaption>
+        <span class="key"><i class="k-crank"></i>曲柄（原动件）</span>
+        <span class="key"><i class="k-ink"></i>机架、导杆、滑块</span>
+        <span class="key"><i class="k-gamma"></i>F、v<sub>B4</sub> 与 α、γ</span>
+        <span class="key"><i class="k-ghost"></i>γ<sub>min</sub> 位置</span>
+      </figcaption>
+    </figure>
+
+    <aside class="panel" aria-label="控制与读数">
+      <section class="group">
+        <h2>播放</h2>
+        <div class="row between">
+          <button id="play" class="btn primary" type="button">▶ 播放</button>
+          <div class="seg mono" role="group" aria-label="播放速度">
+            <button type="button" data-speed="0.25" aria-pressed="false">¼×</button>
+            <button type="button" data-speed="0.5" aria-pressed="false">½×</button>
+            <button type="button" data-speed="1" aria-pressed="true">1×</button>
+            <button type="button" data-speed="2" aria-pressed="false">2×</button>
+          </div>
+        </div>
+        <div class="row between">
+          <span class="hint">曲柄转向</span>
+          <div class="seg" role="group" aria-label="曲柄转向">
+            <button type="button" data-dir="1" aria-pressed="true">逆时针</button>
+            <button type="button" data-dir="-1" aria-pressed="false">顺时针</button>
+          </div>
+        </div>
+        <div class="slider">
+          <label for="phi">曲柄转角 <span><span class="var">φ</span> = <output id="phi-out" for="phi">—</output></span></label>
+          <input id="phi" type="range" min="0" max="360" step="0.1" value="338.4">
+        </div>
+        <div class="row">
+          <button class="btn" type="button" id="go-fig">题图位置</button>
+          <button class="btn" type="button" id="go-min">γ<sub>min</sub> 位置</button>
+        </div>
+        <p class="hint"><span class="var">φ</span> 从水平向右量起，逆时针为正。空格键播放 / 暂停。</p>
+      </section>
+
+      <section class="group">
+        <h2>当前位置</h2>
+        <dl class="readout">
+          <dt><span class="var">l</span><sub>CB</sub></dt><dd id="r-cb">—</dd>
+          <dt>压力角 α = arcsin(<span class="var">e</span>/<span class="var">l</span><sub>CB</sub>)</dt><dd id="r-a">—</dd>
+          <dt>传动角 γ = 90° − α</dt><dd id="r-g" class="hl">—</dd>
+          <dt>导杆转向</dt><dd id="r-w" class="text">—</dd>
+        </dl>
+      </section>
+
+      <section class="group">
+        <h2>传动角随曲柄转角的变化</h2>
+        <svg id="chart" class="chart" viewBox="0 0 320 150" role="img" aria-label="传动角随曲柄转角变化曲线"></svg>
+        <dl class="readout">
+          <dt>机构类型</dt><dd><span id="r-type" class="pill osc">—</span></dd>
+        </dl>
+        <p id="r-why" class="why">—</p>
+        <dl class="readout">
+          <dt>最小传动角 γ<sub>min</sub></dt><dd id="r-gmin" class="hl">—</dd>
+          <dt>出现位置</dt><dd id="r-where" class="text">—</dd>
+        </dl>
+      </section>
+
+      <section class="group">
+        <h2>显示</h2>
+        <div class="toggles">
+          <label class="toggle"><input id="t-gam" type="checkbox" checked>F、v 与 α、γ</label>
+          <label class="toggle"><input id="t-tri" type="checkbox" checked>三角形 CDB</label>
+          <label class="toggle"><input id="t-ghost" type="checkbox" checked>γ<sub>min</sub> 位置</label>
+        </div>
+      </section>
+
+      <section class="group">
+        <h2>参数（<span class="var">l</span><sub>AC</sub> = 40 不变）</h2>
+        <div class="slider">
+          <label for="e">偏距 <span><span class="var">e</span> = <output id="e-out" for="e">4</output></span></label>
+          <input id="e" type="range" min="0" max="12" step="0.5" value="4">
+        </div>
+        <div class="slider">
+          <label for="r">曲柄长 <span><span class="var">l</span><sub>AB</sub> = <output id="r-out" for="r">20</output></span></label>
+          <input id="r" type="range" min="6" max="56" step="1" value="20">
+        </div>
+        <div class="row">
+          <button class="btn small" type="button" data-preset="fig">题图</button>
+          <button class="btn small" type="button" data-preset="e0">e = 0</button>
+          <button class="btn small" type="button" data-preset="rot">e = 0，l<sub>AB</sub> = 48</button>
+        </div>
+        <p class="hint">第 (3) 问拖 <span class="var">l</span><sub>AB</sub> 越过 40 看导杆变成整周转动；第 (4) 问把 <span class="var">e</span> 拖到 0 看 γ 变成恒 90°。</p>
+      </section>
+    </aside>
+  </main>
+
+  <section class="solution" aria-label="解题思路">
+    <h2>这题怎么解</h2>
+    <div class="steps">
+      <div class="step">
+        <h3><span class="q">(1)</span>图示位置的传动角 γ</h3>
+        <p>不计摩擦，滑块对导杆的作用力 F 垂直于导杆，作用在 B 点。导杆上与 B 重合的点 B<sub>4</sub> 绕 C 转动，速度 v<sub>B4</sub> ⊥ CB。F 与 v<sub>B4</sub> 的夹角就是压力角 α，它等于直角三角形 CDB 中的 ∠CBD。</p>
+        <div class="formula">sin α = e / l<sub>CB</sub>　<span class="up">⇒</span>　γ = 90° − α = ∠BCD</div>
+        <p>按图量得 <span class="var">l</span><sub>CB</sub> ≈ 30.2（取 <span class="var">l</span><sub>AC</sub> = 40），α ≈ 7.6°，<span class="ans">γ ≈ 82.4°</span>。在图上标 γ：可以标在 C 点（CD 与 CB 的夹角），也可以标在 B 点（v<sub>B4</sub> 与导杆的夹角），两者相等。</p>
+      </div>
+      <div class="step">
+        <h3><span class="q">(2)</span>最小传动角 γ<sub>min</sub> 及其位置</h3>
+        <p>cos γ = <span class="var">e</span> / <span class="var">l</span><sub>CB</sub>，<span class="var">e</span> 不变，<span class="var">l</span><sub>CB</sub> 越短 γ 越小。B 在以 A 为圆心的曲柄圆上，离 C 最近时 <span class="var">l</span><sub>CB</sub> = <span class="var">l</span><sub>AC</sub> − <span class="var">l</span><sub>AB</sub>，此时曲柄 AB 与机架 AC 重叠共线，B 落在 AC 上。</p>
+        <div class="formula">γ<sub>min</sub> = arccos[ e / (l<sub>AC</sub> − l<sub>AB</sub>) ]</div>
+        <p>按图比例 <span class="ans">γ<sub>min</sub> ≈ arccos(4/20) ≈ 78.5°</span>。点「γ<sub>min</sub> 位置」可以看到这一位置。</p>
+      </div>
+      <div class="step">
+        <h3><span class="q">(3)</span>e = 0 时成为转动导杆机构的条件</h3>
+        <p><span class="var">e</span> = 0 时导杆通过 C。导杆要整周转动，C 必须落在曲柄圆里面，B 才能绕 C 转一整圈，所以</p>
+        <div class="formula">l<sub>AB</sub> &gt; l<sub>AC</sub></div>
+        <p>反过来 <span class="var">l</span><sub>AB</sub> &lt; <span class="var">l</span><sub>AC</sub> 时导杆只能摆动。推广到 <span class="var">e</span> &gt; 0，转动导杆需要 <span class="var">l</span><sub>AB</sub> &gt; <span class="var">l</span><sub>AC</sub> + <span class="var">e</span>；摆动导杆要曲柄能整周转动，需要 <span class="var">l</span><sub>AB</sub> &lt; <span class="var">l</span><sub>AC</sub> − <span class="var">e</span>。</p>
+      </div>
+      <div class="step">
+        <h3><span class="q">(4)</span>e = 0 与 e &gt; 0 哪个传力好</h3>
+        <p><span class="var">e</span> = 0 时 CB 就在导杆上，v<sub>B4</sub> ⊥ 导杆，与 F 方向一致，α = 0，γ 恒为 90°。<span class="var">e</span> &gt; 0 时 cos γ = <span class="var">e</span>/<span class="var">l</span><sub>CB</sub> &gt; 0，γ 总小于 90°，而且 <span class="var">e</span> 越大 γ<sub>min</sub> 越小。</p>
+        <p>所以 <span class="ans"><span class="var">l</span><sub>AB</sub>、<span class="var">l</span><sub>AC</sub> 一定时，e = 0 的传力效果更好</span>。</p>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+(() => {
+  const D = Math.PI / 180;
+  const NS = 'http://www.w3.org/2000/svg';
+  const VW = 680, VH = 620, PAD = 36;
+  let S = 8, OX = 340, OY = 300;                 // model units -> drawing px (y up in the model)
+  const X = x => +(OX + S * x).toFixed(2);
+  const Y = y => +(OY - S * y).toFixed(2);
+  const pt = (x, y) => X(x) + ',' + Y(y);
+  const px = v => v / S;                          // a length given in px, in model units
+  const mod = (a, m) => ((a % m) + m) % m;
+  const $ = id => document.getElementById(id);
+
+  // ---------- geometry from the figure ----------
+  // C at the origin. A is placed so that, in the figure position, CD is horizontal and the guide vertical.
+  const AC = 40;
+  const FIG = { r: 20, e: 4, cb: 30.2 };
+  const FIGB = [FIG.e, Math.sqrt(FIG.cb ** 2 - FIG.e ** 2)];
+  const A = (() => {
+    const b = FIG.cb, ux = FIGB[0] / b, uy = FIGB[1] / b;
+    const a = (AC * AC - FIG.r * FIG.r + b * b) / (2 * b), h = Math.sqrt(AC * AC - a * a);
+    return [a * ux - h * uy, a * uy + h * ux];
+  })();
+  const PHI_FIG = mod(Math.atan2(FIGB[1] - A[1], FIGB[0] - A[0]) / D, 360);
+  const PHI_MIN = mod(Math.atan2(-A[1], -A[0]) / D, 360);   // crank pointing from A toward C
+
+  const geo = { r: FIG.r, e: FIG.e };
+  const state = { phi: PHI_FIG, playing: false, speed: 1, dir: 1, bounce: 1 };
+  const show = { gam: true, tri: true, ghost: true };
+  const PERIOD = 6;
+
+  function el(tag, attrs, parent) {
+    const n = document.createElementNS(NS, tag);
+    if (attrs) set(n, attrs);
+    if (parent) parent.appendChild(n);
+    return n;
+  }
+  function set(n, attrs) { for (const k in attrs) n.setAttribute(k, attrs[k]); return n; }
+  function label(parent, s, low, attrs) {
+    const t = el('text', attrs || {}, parent);
+    t.textContent = s;
+    if (low) { const sp = el('tspan', { 'baseline-shift': 'sub', 'font-size': '68%' }, t); sp.textContent = low; }
+    return t;
+  }
+  function place(t, x, y) { set(t, { x: X(x), y: Y(y) }); }
+  function arcPath(cx, cy, R, a0, a1) {           // CCW from a0 to a1 (model angles, degrees)
+    const x0 = cx + R * Math.cos(a0 * D), y0 = cy + R * Math.sin(a0 * D);
+    const x1 = cx + R * Math.cos(a1 * D), y1 = cy + R * Math.sin(a1 * D);
+    return `M${pt(x0, y0)} A${(R * S).toFixed(2)} ${(R * S).toFixed(2)} 0 ${Math.abs(a1 - a0) > 180 ? 1 : 0} 0 ${pt(x1, y1)}`;
+  }
+  function arcShort(cx, cy, R, a0, a1) {
+    const d = mod(a1 - a0 + 180, 360) - 180;
+    return { d: d >= 0 ? arcPath(cx, cy, R, a0, a0 + d) : arcPath(cx, cy, R, a0 + d, a0), mid: a0 + d / 2 };
+  }
+
+  // ---------- kinematics ----------
+  const rhoMin = () => Math.max(geo.e, 0.3);
+  function solve(phi) {
+    const p = phi * D, { r, e } = geo;
+    const Bx = A[0] + r * Math.cos(p), By = A[1] + r * Math.sin(p);
+    const rho = Math.hypot(Bx, By);
+    if (rho < rhoMin() - 1e-9) return null;      // the slider cannot be assembled here
+    const beta = Math.atan2(By, Bx);
+    const c = Math.min(1, e / rho);
+    const mu = beta - Math.acos(c);              // direction of CD (normal of the guide)
+    const mx = Math.cos(mu), my = Math.sin(mu);
+    return {
+      Bx, By, rho, beta: beta / D, mu: mu / D, mx, my, ux: -my, uy: mx,
+      Dx: e * mx, Dy: e * my, alpha: Math.asin(c) / D, gamma: Math.acos(c) / D
+    };
+  }
+  const guideLen = () => Math.sqrt(Math.max(0, (AC + geo.r) ** 2 - geo.e ** 2)) + 4;
+
+  function classify() {
+    const { r, e } = geo, lo = AC - e, hi = AC + e, eps = 1e-9;
+    if (e === 0 && r === AC) return { key: 'bad', text: '曲柄不能整周转动', why: 'l_AB = l_AC 时 B 会转到与 C 重合，导杆方向不确定' };
+    if (r < lo - eps) return { key: 'osc', text: '摆动导杆机构', why: '曲柄整周转动，导杆往复摆动（l_AB < l_AC − e）' };
+    if (r > hi + eps) return { key: 'rot', text: '转动导杆机构', why: '曲柄和导杆都能整周转动（l_AB > l_AC + e）' };
+    if (Math.abs(r - lo) < eps || Math.abs(r - hi) < eps) return { key: 'edge', text: '临界', why: 'AB 与 AC 共线时 l_CB = e，γ = 0，出现死点' };
+    return { key: 'bad', text: '曲柄不能整周转动', why: 'l_AC − e < l_AB < l_AC + e：B 靠近 C 时离 C 不足 e，滑块装不上，曲柄只能来回摆' };
+  }
+  let TYPE = classify();
+
+  function nearestFeasible(phi) {
+    if (solve(phi)) return phi;
+    for (let k = 0.1; k <= 180; k += 0.1) {
+      if (solve(phi + k)) return mod(phi + k, 360);
+      if (solve(phi - k)) return mod(phi - k, 360);
+    }
+    return phi;
+  }
+
+  // fit the whole motion into the drawing
+  // fit the whole motion, including the F / v arrows at B, into the drawing
+  function fitView() {
+    const { r } = geo, L = guideLen();
+    const pts = [[0, 0], [A[0] - r, A[1] - r], [A[0] + r, A[1] + r]], samples = [];
+    for (let p = 0; p < 360; p += 3) {
+      const s = solve(p); if (!s) continue;
+      samples.push(s);
+      pts.push([s.Dx, s.Dy], [s.Dx + L * s.ux, s.Dy + L * s.uy]);
+    }
+    const fit = list => {
+      let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
+      list.forEach(([x, y]) => { x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y); });
+      S = Math.min((VW - 2 * PAD) / (x1 - x0), (VH - 2 * PAD) / (y1 - y0));
+      OX = VW / 2 - S * (x0 + x1) / 2;
+      OY = VH / 2 + S * (y0 + y1) / 2;
+    };
+    fit(pts);
+    const R = 112 / S, extra = pts.slice();
+    samples.forEach(s => {
+      const bx = s.Bx / s.rho, by = s.By / s.rho;
+      [[s.mx, s.my], [-by, bx]].forEach(([dx, dy]) => extra.push([s.Bx + R * dx, s.By + R * dy], [s.Bx - R * dx, s.By - R * dy]));
+    });
+    fit(extra);
+  }
+
+  // ---------- layers ----------
+  const gBase = $('g-base'), gGhost = $('g-ghost'), gTri = $('g-tri'), gMech = $('g-mech'), gGam = $('g-gam');
+
+  // frame AC (hatched, as in the figure), hinges A and C, ω1
+  function buildBase() {
+    gBase.replaceChildren();
+    const ax = A[0] / AC, ay = A[1] / AC;
+    let nx = -ay, ny = ax;
+    if (nx * FIGB[0] + ny * FIGB[1] > 0) { nx = -nx; ny = -ny; }   // hatch on the side away from B
+    let hx = nx - 0.6 * ax, hy = ny - 0.6 * ay; const hn = Math.hypot(hx, hy); hx /= hn; hy /= hn;
+    const g = el('g', { style: 'stroke: var(--ink)', 'stroke-linecap': 'round' }, gBase);
+    el('line', { x1: X(0), y1: Y(0), x2: X(A[0]), y2: Y(A[1]), 'stroke-width': 2.2 }, g);
+    const step = px(13), hl = px(11);
+    for (let t = px(18); t < AC - px(14); t += step) {
+      el('line', { x1: X(t * ax), y1: Y(t * ay), x2: X(t * ax + hl * hx), y2: Y(t * ay + hl * hy), 'stroke-width': 1.1, opacity: 0.75 }, g);
+    }
+    // rotation sense of the crank
+    const R = px(30), a0 = 100, a1 = 160;
+    el('path', { d: arcPath(A[0], A[1], R, a0, a1), fill: 'none', style: 'stroke: var(--crank)', 'stroke-width': 1.8, [state.dir > 0 ? 'marker-end' : 'marker-start']: 'url(#ah-crank)' }, gBase);
+    const w = label(gBase, 'ω', '1', { class: 't-crank', 'font-size': 17 });
+    place(w, A[0] + (R + px(16)) * Math.cos(130 * D) - px(14), A[1] + (R + px(16)) * Math.sin(130 * D) + px(2));
+  }
+
+  // γmin position (ghost)
+  function buildGhost() {
+    gGhost.replaceChildren();
+    if (TYPE.key === 'bad') return;
+    const s = solve(PHI_MIN); if (!s) return;
+    const g = el('g', { style: 'stroke: var(--ghost)', fill: 'none', 'stroke-width': 1.6, 'stroke-dasharray': '7 5' }, gGhost);
+    const L = guideLen(), hl = px(26), hw = px(15);
+    if (geo.e > 0.01) el('line', { x1: X(0), y1: Y(0), x2: X(s.Dx), y2: Y(s.Dy) }, g);
+    el('line', { x1: X(s.Dx), y1: Y(s.Dy), x2: X(s.Dx + L * s.ux), y2: Y(s.Dy + L * s.uy) }, g);
+    el('polygon', { points: blockPts(s, hl, hw), 'stroke-width': 1.2 }, g);
+    el('line', { x1: X(A[0]), y1: Y(A[1]), x2: X(s.Bx), y2: Y(s.By), 'stroke-width': 2.2 }, g);
+    el('circle', { cx: X(s.Bx), cy: Y(s.By), r: 5, style: 'stroke: var(--ghost); fill: var(--sheet)', 'stroke-dasharray': 'none', 'stroke-width': 1.5 }, g);
+    const lx = s.Bx + (hw + px(14)) * s.mx, ly = s.By + (hw + px(14)) * s.my;
+    const t = label(gGhost, 'B′', null, { class: 't-ghost', 'font-size': 18 });
+    place(t, lx, ly - px(2));
+    const t2 = label(gGhost, 'γ', 'min', { class: 't-ghost', 'font-size': 17 });
+    place(t2, lx, ly - px(24));
+  }
+
+  function blockPts(s, hl, hw) {
+    return [[hl, hw], [hl, -hw], [-hl, -hw], [-hl, hw]]
+      .map(([a, b]) => pt(s.Bx + a * s.ux + b * s.mx, s.By + a * s.uy + b * s.my)).join(' ');
+  }
+
+  // ---------- dynamic elements ----------
+  const ink = 'stroke: var(--ink)';
+  // triangle CDB
+  const cbLine = el('line', { style: 'stroke: var(--muted)', 'stroke-width': 1.3, 'stroke-dasharray': '6 4' }, gTri);
+  const rightMark = el('polyline', { fill: 'none', style: 'stroke: var(--muted)', 'stroke-width': 1.2 }, gTri);
+  const gArcC = el('path', { fill: 'none', style: 'stroke: var(--gamma)', 'stroke-width': 1.8 }, gTri);
+  const gLabC = label(gTri, 'γ', null, { class: 't-gamma', 'font-size': 18 });
+  // mechanism
+  const cd = el('line', { style: ink, 'stroke-width': 3, 'stroke-linecap': 'round' }, gMech);
+  const guide = el('line', { style: ink, 'stroke-width': 3, 'stroke-linecap': 'round' }, gMech);
+  const corner = el('circle', { r: 2.2, style: 'fill: var(--ink)' }, gMech);
+  const block = el('polygon', { style: 'stroke: var(--ink); fill: var(--sheet)', 'stroke-width': 2.2, 'stroke-linejoin': 'round' }, gMech);
+  const crank = el('line', { style: 'stroke: var(--crank)', 'stroke-width': 4, 'stroke-linecap': 'round' }, gMech);
+  const hinge = () => el('circle', { r: 6.4, style: 'stroke: var(--ink); fill: var(--sheet)', 'stroke-width': 2.2 }, gMech);
+  const hA = hinge(), hC = hinge(), hB = hinge();
+  const lA = label(gMech, 'A', null, { 'font-size': 21 });
+  const lC = label(gMech, 'C', null, { 'font-size': 21 });
+  const lB = label(gMech, 'B', null, { 'font-size': 21 });
+  const lD = label(gMech, 'D', null, { 'font-size': 21 });
+  const lE = label(gMech, 'e', null, { 'font-size': 18, class: 't-muted' });
+  // force / velocity at B
+  const fArrow = el('line', { style: 'stroke: var(--gamma)', 'stroke-width': 2.4, 'marker-end': 'url(#ah-gamma)' }, gGam);
+  const vArrow = el('line', { style: 'stroke: var(--gamma)', 'stroke-width': 2.4, 'stroke-dasharray': '7 3', 'marker-end': 'url(#ah-gamma)' }, gGam);
+  const aArc = el('path', { fill: 'none', style: 'stroke: var(--gamma)', 'stroke-width': 1.6 }, gGam);
+  const gArcB = el('path', { fill: 'none', style: 'stroke: var(--gamma)', 'stroke-width': 1.6 }, gGam);
+  const fLab = label(gGam, 'F', null, { class: 't-gamma', 'font-size': 18 });
+  const vLab = label(gGam, 'v', 'B4', { class: 't-gamma', 'font-size': 18 });
+  const aLab = label(gGam, 'α', null, { class: 't-gamma', 'font-size': 17 });
+  const gLabB = label(gGam, 'γ', null, { class: 't-gamma', 'font-size': 17 });
+
+  // ---------- chart ----------
+  const chart = $('chart');
+  const CH = { w: 320, h: 150, l: 34, r: 8, t: 12, b: 24 };
+  let cy0 = 70, cy1 = 90, chartMarker, chartGuide;
+  const cx = p => CH.l + (p / 360) * (CH.w - CH.l - CH.r);
+  const cyv = g => CH.t + (cy1 - g) / (cy1 - cy0) * (CH.h - CH.t - CH.b);
+  function buildChart() {
+    chart.replaceChildren();
+    const vals = [];
+    for (let p = 0; p <= 360; p += 1) { const s = solve(p); vals.push(s ? s.gamma : null); }
+    const lo = Math.min(...vals.filter(v => v !== null));
+    cy1 = 90;
+    cy0 = Math.max(0, Math.floor((lo - 4) / 5) * 5);
+    if (cy0 > 80) cy0 = 80;
+    const bottom = CH.h - CH.b;
+    el('line', { x1: CH.l, y1: bottom, x2: CH.w - CH.r, y2: bottom, style: 'stroke: var(--rule)' }, chart);
+    [cy0, (cy0 + 90) / 2, 90].forEach(v => {
+      el('line', { x1: CH.l, y1: cyv(v), x2: CH.w - CH.r, y2: cyv(v), style: 'stroke: var(--rule)', 'stroke-dasharray': '2 3' }, chart);
+      const t = el('text', { x: CH.l - 4, y: cyv(v) + 3.5, 'text-anchor': 'end' }, chart); t.textContent = (+v.toFixed(1)) + '°';
+    });
+    [0, 90, 180, 270, 360].forEach(v => {
+      el('line', { x1: cx(v), y1: bottom, x2: cx(v), y2: bottom + 3, style: 'stroke: var(--muted)' }, chart);
+      const t = el('text', { x: cx(v), y: bottom + 14, 'text-anchor': 'middle' }, chart); t.textContent = v + '°';
+    });
+    // infeasible stretches
+    let start = null;
+    for (let p = 0; p <= 360; p++) {
+      const bad = vals[p] === null;
+      if (bad && start === null) start = p;
+      if ((!bad || p === 360) && start !== null) {
+        el('rect', { x: cx(start), y: CH.t, width: cx(bad ? p : p - 1) - cx(start), height: bottom - CH.t, style: 'fill: var(--bad-soft)' }, chart);
+        start = null;
+      }
+    }
+    el('line', { x1: cx(PHI_FIG), y1: CH.t, x2: cx(PHI_FIG), y2: bottom, style: 'stroke: var(--muted)', 'stroke-dasharray': '1 3' }, chart);
+    { const t = el('text', { x: cx(PHI_FIG) - 3, y: CH.t - 2, 'text-anchor': 'end' }, chart); t.textContent = '题图'; }
+    let d = '', pen = false;
+    vals.forEach((v, p) => {
+      if (v === null) { pen = false; return; }
+      d += (pen ? 'L' : 'M') + cx(p).toFixed(1) + ' ' + cyv(v).toFixed(1); pen = true;
+    });
+    el('path', { d, fill: 'none', style: 'stroke: var(--ink)', 'stroke-width': 1.6 }, chart);
+    const sm = solve(PHI_MIN);
+    if (sm && TYPE.key !== 'bad' && geo.e > 0) {
+      el('circle', { cx: cx(PHI_MIN), cy: cyv(sm.gamma), r: 3.5, style: 'fill: var(--ghost)' }, chart);
+      const t = el('text', { x: cx(PHI_MIN), y: cyv(sm.gamma) + 14, 'text-anchor': 'middle', style: 'fill: var(--ghost)' }, chart);
+      t.textContent = 'γmin';
+    }
+    chartGuide = el('line', { y1: CH.t, y2: bottom, style: 'stroke: var(--crank)', 'stroke-width': 1, opacity: 0.6 }, chart);
+    chartMarker = el('circle', { r: 4, style: 'fill: var(--crank); stroke: var(--sheet)', 'stroke-width': 1.5 }, chart);
+  }
+
+  // ---------- static readouts ----------
+  function refreshResults() {
+    const pill = $('r-type');
+    pill.className = 'pill ' + TYPE.key; pill.textContent = TYPE.text;
+    $('r-why').innerHTML = TYPE.why.replace(/l_(AB|AC|CB)/g, '<span class="var">l</span><sub>$1</sub>');
+    const { r, e } = geo;
+    if (TYPE.key === 'bad') {
+      $('r-gmin').textContent = '—'; $('r-where').textContent = '曲柄不能整周转动';
+    } else if (e === 0) {
+      $('r-gmin').textContent = '90°（恒定）'; $('r-where').textContent = '任意位置';
+    } else {
+      $('r-gmin').textContent = (Math.acos(Math.min(1, e / Math.abs(AC - r))) / D).toFixed(1) + '°';
+      $('r-where').textContent = r < AC ? 'AB 与 AC 重叠共线（B 在 AC 上）' : 'AB 与 AC 共线（B 在 AC 延长线上）';
+    }
+    $('go-min').disabled = TYPE.key === 'bad';
+  }
+
+  // ---------- render ----------
+  let lastW = -1;
+  function dMu(phi) {
+    const h = 0.05;
+    const a = solve(phi - h), b = solve(phi + h), c = solve(phi);
+    if (a && b) return (mod(b.mu - a.mu + 180, 360) - 180) / (2 * h);
+    if (b && c) return (mod(b.mu - c.mu + 180, 360) - 180) / h;
+    if (a && c) return (mod(c.mu - a.mu + 180, 360) - 180) / h;
+    return 0;
+  }
+
+  function render() {
+    const s = solve(state.phi); if (!s) return;
+    const { e } = geo, L = guideLen(), hl = px(26), hw = px(15);
+    const hasCD = e > 0.01;
+
+    // mechanism
+    cd.style.display = corner.style.display = lD.style.display = lE.style.display = hasCD ? '' : 'none';
+    set(cd, { x1: X(0), y1: Y(0), x2: X(s.Dx), y2: Y(s.Dy) });
+    set(corner, { cx: X(s.Dx), cy: Y(s.Dy) });
+    set(guide, { x1: X(s.Dx), y1: Y(s.Dy), x2: X(s.Dx + L * s.ux), y2: Y(s.Dy + L * s.uy) });
+    set(block, { points: blockPts(s, hl, hw) });
+    set(crank, { x1: X(A[0]), y1: Y(A[1]), x2: X(s.Bx), y2: Y(s.By) });
+    set(hA, { cx: X(A[0]), cy: Y(A[1]) }); set(hC, { cx: X(0), cy: Y(0) }); set(hB, { cx: X(s.Bx), cy: Y(s.By) });
+    place(lA, A[0] - px(26), A[1] + px(2));
+    place(lC, -px(14) - px(14) * s.mx - px(6), -px(14) * s.my - px(8));
+    place(lD, s.Dx + px(10) * s.mx - px(20) * s.ux - px(4), s.Dy + px(10) * s.my - px(20) * s.uy - px(6));
+    place(lE, s.Dx / 2 - px(20) * s.ux - px(4), s.Dy / 2 - px(20) * s.uy - px(6));
+    place(lB, s.Bx - (hw + px(22)) * s.mx - px(16) * s.ux - px(6), s.By - (hw + px(22)) * s.my - px(16) * s.uy - px(6));
+
+    // directions: guide angular velocity, v_B4 ⊥ CB, F ⊥ guide with F·v > 0
+    const sgn = state.dir * state.bounce;
+    const w = dMu(state.phi) * sgn;                     // ω4/ω1 (CCW positive)
+    if (Math.abs(w) > 1e-4) lastW = Math.sign(w);
+    const bx = s.Bx / s.rho, by = s.By / s.rho;
+    const vx = -by * lastW, vy = bx * lastW;
+    const fs = Math.sign(vx * s.mx + vy * s.my) || 1;
+    const fx = fs * s.mx, fy = fs * s.my;
+    const wdir = Math.sign(vx * s.ux + vy * s.uy) || 1;
+    const wx = wdir * s.ux, wy = wdir * s.uy;
+    const ang = (x, y) => Math.atan2(y, x) / D;
+
+    // triangle CDB and γ at C
+    set(cbLine, { x1: X(0), y1: Y(0), x2: X(s.Bx), y2: Y(s.By) });
+    const k = px(10);
+    rightMark.style.display = (hasCD && e * S > 18) ? '' : 'none';
+    set(rightMark, { points: `${pt(s.Dx - k * s.mx, s.Dy - k * s.my)} ${pt(s.Dx - k * s.mx + k * s.ux, s.Dy - k * s.my + k * s.uy)} ${pt(s.Dx + k * s.ux, s.Dy + k * s.uy)}` });
+    gArcC.style.display = gLabC.style.display = hasCD ? '' : 'none';
+    const RC = px(52);
+    const ac = arcShort(0, 0, RC, s.mu, s.beta);
+    set(gArcC, { d: ac.d });
+    place(gLabC, (RC + px(13)) * Math.cos(ac.mid * D) - px(5), (RC + px(13)) * Math.sin(ac.mid * D) - px(6));
+
+    // F and v at B; labels go on the outer side of each arrow so they never sit on top of each other
+    const st = hw + px(3), sv = px(20), len = px(70);
+    set(fArrow, { x1: X(s.Bx + st * fx), y1: Y(s.By + st * fy), x2: X(s.Bx + (st + len) * fx), y2: Y(s.By + (st + len) * fy) });
+    set(vArrow, { x1: X(s.Bx + sv * vx), y1: Y(s.By + sv * vy), x2: X(s.Bx + (sv + len) * vx), y2: Y(s.By + (sv + len) * vy) });
+    const side = (mod(ang(vx, vy) - ang(fx, fy) + 180, 360) - 180) >= 0 ? 1 : -1;   // 1: v is counterclockwise of F
+    const off = px(15);
+    place(fLab, s.Bx + (st + len + px(6)) * fx + side * off * fy - px(5), s.By + (st + len + px(6)) * fy - side * off * fx - px(6));
+    place(vLab, s.Bx + (sv + len + px(6)) * vx - side * off * vy - px(8), s.By + (sv + len + px(6)) * vy + side * off * vx - px(6));
+    const Ra = px(60), Rg = px(44);
+    const aa = arcShort(s.Bx, s.By, Ra, ang(fx, fy), ang(vx, vy));
+    set(aArc, { d: aa.d });
+    const aAng = ang(fx, fy) - side * 13;                                             // just outside the narrow F–v wedge
+    place(aLab, s.Bx + Ra * Math.cos(aAng * D) - px(5), s.By + Ra * Math.sin(aAng * D) - px(6));
+    const ag = arcShort(s.Bx, s.By, Rg, ang(vx, vy), ang(wx, wy));
+    set(gArcB, { d: ag.d });
+    place(gLabB, s.Bx + (Rg + px(12)) * Math.cos(ag.mid * D) - px(5), s.By + (Rg + px(12)) * Math.sin(ag.mid * D) - px(6));
+    const tiny = e < 0.01;                               // e = 0: α = 0, the arcs collapse
+    aArc.style.display = aLab.style.display = tiny ? 'none' : '';
+
+    // readouts
+    const phiTxt = (Math.abs(state.phi) < 0.05 ? 0 : state.phi).toFixed(1) + '°';
+    $('phi-out').textContent = phiTxt; $('phi').value = state.phi.toFixed(1);
+    $('h-phi').textContent = phiTxt;
+    $('h-cb').textContent = $('r-cb').textContent = s.rho.toFixed(1);
+    $('h-a').textContent = $('r-a').textContent = s.alpha.toFixed(1) + '°';
+    $('h-g').textContent = $('r-g').textContent = s.gamma.toFixed(1) + '°';
+    $('r-w').textContent = Math.abs(w) < 1e-3 ? '瞬时静止' : (w > 0 ? '逆时针' : '顺时针') + '，ω₄/ω₁ = ' + Math.abs(w).toFixed(2);
+    if (chartMarker) {
+      set(chartMarker, { cx: cx(state.phi), cy: cyv(s.gamma) });
+      set(chartGuide, { x1: cx(state.phi), x2: cx(state.phi) });
+    }
+  }
+
+  function applyToggles() {
+    gGam.style.display = show.gam ? '' : 'none';
+    gTri.style.display = show.tri ? '' : 'none';
+    gGhost.style.display = show.ghost ? '' : 'none';
+  }
+
+  function rebuild() {
+    TYPE = classify();
+    state.bounce = 1;
+    fitView();
+    buildBase(); buildGhost(); buildChart(); refreshResults();
+    state.phi = nearestFeasible(state.phi);
+    render();
+  }
+
+  // ---------- animation ----------
+  let raf = 0, last = null;
+  function tick(t) {
+    if (!state.playing) { raf = 0; last = null; return; }
+    if (last !== null) {
+      const dt = Math.min(0.05, (t - last) / 1000);
+      const step = (360 / PERIOD) * state.speed * dt * state.dir * state.bounce;
+      const next = mod(state.phi + step, 360);
+      if (solve(next)) state.phi = next; else state.bounce *= -1;   // crank cannot pass: it swings back
+      render();
+    }
+    last = t;
+    raf = requestAnimationFrame(tick);
+  }
+  function setPlaying(on) {
+    state.playing = on;
+    $('play').textContent = on ? '❚❚ 暂停' : '▶ 播放';
+    $('play').setAttribute('aria-pressed', on ? 'true' : 'false');
+    if (on && !raf) { last = null; raf = requestAnimationFrame(tick); }
+  }
+  function goTo(phi) { setPlaying(false); state.phi = nearestFeasible(mod(phi, 360)); render(); }
+
+  $('play').addEventListener('click', () => setPlaying(!state.playing));
+  document.querySelectorAll('[data-speed]').forEach(b => b.addEventListener('click', () => {
+    state.speed = +b.dataset.speed;
+    document.querySelectorAll('[data-speed]').forEach(o => o.setAttribute('aria-pressed', o === b ? 'true' : 'false'));
+  }));
+  document.querySelectorAll('[data-dir]').forEach(b => b.addEventListener('click', () => {
+    state.dir = +b.dataset.dir; state.bounce = 1;
+    document.querySelectorAll('[data-dir]').forEach(o => o.setAttribute('aria-pressed', o === b ? 'true' : 'false'));
+    buildBase(); render();
+  }));
+  $('phi').addEventListener('input', ev => goTo(+ev.target.value));
+  $('go-fig').addEventListener('click', () => goTo(PHI_FIG));
+  $('go-min').addEventListener('click', () => goTo(PHI_MIN));
+  $('t-gam').addEventListener('change', ev => { show.gam = ev.target.checked; applyToggles(); });
+  $('t-tri').addEventListener('change', ev => { show.tri = ev.target.checked; applyToggles(); });
+  $('t-ghost').addEventListener('change', ev => { show.ghost = ev.target.checked; applyToggles(); });
+  function setParams(r, e) {
+    geo.r = r; geo.e = e;
+    $('r').value = r; $('e').value = e;
+    $('r-out').textContent = String(r);
+    $('e-out').textContent = e % 1 ? e.toFixed(1) : String(e);
+    rebuild();
+  }
+  $('e').addEventListener('input', ev => setParams(geo.r, +ev.target.value));
+  $('r').addEventListener('input', ev => setParams(+ev.target.value, geo.e));
+  document.querySelectorAll('[data-preset]').forEach(b => b.addEventListener('click', () => {
+    const p = b.dataset.preset;
+    if (p === 'fig') { setParams(FIG.r, FIG.e); goTo(PHI_FIG); }
+    if (p === 'e0') { setParams(FIG.r, 0); goTo(PHI_FIG); }
+    if (p === 'rot') { setParams(48, 0); setPlaying(true); }
+  }));
+  document.addEventListener('keydown', ev => {
+    if (ev.code !== 'Space') return;
+    const tag = (ev.target.tagName || '').toLowerCase();
+    if (tag === 'input' || tag === 'button' || tag === 'select' || tag === 'textarea') return;
+    ev.preventDefault();
+    setPlaying(!state.playing);
+  });
+
+  // start from whatever the form holds (the browser may restore it)
+  show.gam = $('t-gam').checked; show.tri = $('t-tri').checked; show.ghost = $('t-ghost').checked;
+  geo.r = +$('r').value; geo.e = +$('e').value;
+  $('r-out').textContent = String(geo.r); $('e-out').textContent = geo.e % 1 ? geo.e.toFixed(1) : String(geo.e);
+  applyToggles();
+  rebuild();
+  const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  setPlaying(!reduce);
+})();
+</script>
