@@ -1,0 +1,571 @@
+<title>偏置导杆机构演示</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;700&family=Noto+Serif+SC:wght@600;700&family=Noto+Serif:ital,wght@1,500&display=swap">
+<style>
+  /* Layout: drawing sheet on the left, instrument panel on the right; stacks to one column under 900px */
+  :root {
+    --paper: #eef1f4;
+    --sheet: #fbfcfd;
+    --ink: #17202b;
+    --ink-2: #2f3a47;
+    --muted: #5c6776;
+    --rule: #d6dce3;
+    --grid: #e6eaef;
+    --chip: #e4e9ef;
+    --crank: #1d55c4;
+    --crank-soft: rgba(29, 85, 196, .12);
+    --on-accent: #ffffff;
+    --ghost: #a85f08;
+    --gamma: #1d7c52;
+    --font-display: "Noto Serif SC", "Songti SC", "SimSun", serif;
+    --font-body: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+    --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+    --font-label: "Noto Serif", "Times New Roman", Times, serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #0e1318; --sheet: #141a21; --ink: #e2e8ef; --ink-2: #c3ccd6; --muted: #92a0b0;
+      --rule: #29333f; --grid: #1b232c; --chip: #222c37; --crank: #7da4ff; --crank-soft: rgba(125, 164, 255, .16);
+      --on-accent: #0b1220; --ghost: #e3a14e; --gamma: #52c48f; color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #0e1318; --sheet: #141a21; --ink: #e2e8ef; --ink-2: #c3ccd6; --muted: #92a0b0;
+    --rule: #29333f; --grid: #1b232c; --chip: #222c37; --crank: #7da4ff; --crank-soft: rgba(125, 164, 255, .16);
+    --on-accent: #0b1220; --ghost: #e3a14e; --gamma: #52c48f; color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  body { background: var(--paper); color: var(--ink); font-family: var(--font-body); font-size: 15px; line-height: 1.6; }
+  .wrap {
+    max-width: 1180px; margin: 0 auto; display: grid; gap: 22px;
+    padding-block: 26px 48px;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+  }
+
+  header { display: grid; gap: 6px; }
+  .eyebrow { font-family: var(--font-mono); font-size: 12px; letter-spacing: .08em; color: var(--muted); margin: 0; }
+  h1 { font-family: var(--font-display); font-weight: 700; font-size: clamp(24px, 3.4vw, 34px); line-height: 1.25; letter-spacing: .03em; margin: 0; text-wrap: balance; }
+  .lede { margin: 0; max-width: 64ch; color: var(--ink-2); }
+  .lede b { font-weight: 500; }
+  .var { font-family: var(--font-label); font-style: italic; }
+
+  .layout { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 22px; align-items: start; }
+  @media (max-width: 900px) { .layout { grid-template-columns: minmax(0, 1fr); } }
+
+  .stage { margin: 0; background: var(--sheet); border: 1px solid var(--rule); border-radius: 6px; overflow: hidden; min-width: 0; }
+  .stage svg { display: block; width: 100%; height: auto; max-width: 100%; touch-action: manipulation; }
+  figcaption { display: flex; flex-wrap: wrap; gap: 6px 18px; padding: 10px 14px; border-top: 1px solid var(--rule); font-size: 13px; color: var(--muted); }
+  .key { display: inline-flex; align-items: center; gap: 7px; }
+  .key i { display: inline-block; width: 20px; border-top: 3px solid; }
+  .key .k-crank { border-color: var(--crank); }
+  .key .k-ink { border-color: var(--ink); }
+  .key .k-ghost { border-top: 2px dashed var(--ghost); }
+  .key .k-gamma { border-color: var(--gamma); }
+
+  .panel { display: grid; gap: 16px; min-width: 0; }
+  .group { display: grid; gap: 10px; padding-bottom: 16px; border-bottom: 1px solid var(--rule); }
+  .group:last-child { border-bottom: 0; padding-bottom: 0; }
+  .group h2 { margin: 0; font-size: 12.5px; font-weight: 500; letter-spacing: .1em; color: var(--muted); }
+  .row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+  .row.between { justify-content: space-between; }
+
+  button { font: inherit; color: inherit; }
+  .btn { border: 1px solid var(--rule); background: var(--sheet); border-radius: 6px; padding: 6px 12px; cursor: pointer; font-size: 14px; line-height: 1.5; }
+  .btn:hover { border-color: var(--muted); }
+  .btn.primary { background: var(--crank); border-color: var(--crank); color: var(--on-accent); font-weight: 500; min-width: 92px; }
+  .btn.primary:hover { filter: brightness(1.08); }
+  :focus-visible { outline: 2px solid var(--crank); outline-offset: 2px; }
+  .seg { display: inline-flex; border: 1px solid var(--rule); border-radius: 6px; overflow: hidden; background: var(--sheet); }
+  .seg button { border: 0; background: transparent; padding: 6px 11px; cursor: pointer; font-family: var(--font-mono); font-size: 13px; color: var(--muted); }
+  .seg button + button { border-left: 1px solid var(--rule); }
+  .seg button[aria-pressed="true"] { background: var(--chip); color: var(--ink); font-weight: 500; }
+
+  .slider { display: grid; gap: 4px; }
+  .slider label { display: flex; justify-content: space-between; font-size: 13.5px; color: var(--muted); }
+  .slider output { font-family: var(--font-mono); color: var(--ink); font-variant-numeric: tabular-nums; }
+  input[type="range"] { width: 100%; margin: 0; accent-color: var(--crank); }
+  .hint { margin: 0; font-size: 12.5px; color: var(--muted); }
+
+  .readout { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 5px 14px; margin: 0; }
+  .readout dt { color: var(--muted); font-size: 13.5px; }
+  .readout dd { margin: 0; text-align: right; font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-size: 14px; }
+  .pill { display: inline-block; padding: 1px 10px; border-radius: 999px; font-size: 13px; font-family: var(--font-body); }
+  .pill.fast { background: var(--crank-soft); color: var(--crank); }
+  .pill.slow { background: var(--chip); color: var(--ink-2); }
+  .pill.dead { background: transparent; color: var(--ghost); border: 1px solid var(--ghost); }
+
+  .chart { width: 100%; height: auto; display: block; }
+  .chart text { font-family: var(--font-mono); font-size: 10px; fill: var(--muted); }
+
+  .toggles { display: flex; flex-wrap: wrap; gap: 8px; }
+  .toggle { display: inline-flex; align-items: center; gap: 6px; padding: 4px 11px; border: 1px solid var(--rule); border-radius: 999px; cursor: pointer; font-size: 13.5px; user-select: none; background: var(--sheet); }
+  .toggle input { accent-color: var(--crank); margin: 0; }
+
+  .notes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 22px; border-top: 1px solid var(--rule); padding-top: 20px; }
+  @media (max-width: 900px) { .notes { grid-template-columns: minmax(0, 1fr); gap: 16px; } }
+  .note { min-width: 0; }
+  .note h3 { font-family: var(--font-display); font-weight: 600; font-size: 16px; margin: 0 0 6px; letter-spacing: .02em; }
+  .note h3 .q { font-family: var(--font-mono); font-weight: 500; color: var(--ghost); margin-right: 6px; }
+  .note p { margin: 0; font-size: 14px; color: var(--ink-2); max-width: 60ch; }
+
+  /* drawing */
+  #mech text { font-family: var(--font-label); font-style: italic; fill: var(--ink); }
+  #mech .t-ui { font-family: var(--font-mono); font-style: normal; fill: var(--muted); font-size: 17px; }
+  .nowrap { white-space: nowrap; }
+  #mech .t-ghost { fill: var(--ghost); }
+  #mech .t-gamma { fill: var(--gamma); }
+  #mech .t-aux { fill: var(--muted); font-size: 15px; }
+</style>
+
+<div class="wrap">
+  <header>
+    <p class="eyebrow">第 16 题 · 偏置导杆机构</p>
+    <h1>偏置导杆机构转动演示</h1>
+    <p class="lede">曲柄 <span class="var">AB</span> 为原动件，绕 <span class="var">A</span> 逆时针匀速转动；滑块通过与之固连的短臂在 <span class="var">B</span> 处与曲柄铰接，并沿绕 <span class="var">C</span> 摆动的导杆滑动。尺寸按题图比例量取：<b class="nowrap"><span class="var">l</span><sub>AB</sub> : <span class="var">l</span><sub>AC</sub> : <span class="var">e</span> ≈ 21 : 45 : 10</b>。</p>
+  </header>
+
+  <main class="layout">
+    <figure class="stage">
+      <svg id="mech" viewBox="0 0 696 576" role="img" aria-label="偏置导杆机构运动简图：曲柄 AB 绕 A 逆时针转动，导杆绕 C 摆动，虚线为导杆的两个极限位置">
+        <defs>
+          <pattern id="grid" width="30" height="30" patternUnits="userSpaceOnUse" x="12" y="24">
+            <path d="M30 0H0V30" fill="none" style="stroke: var(--grid)" stroke-width="1"/>
+          </pattern>
+          <marker id="ah-ink" viewBox="0 0 10 10" refX="8" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto-start-reverse"><path d="M0 1 L10 5 L0 9 z" style="fill: var(--ink)"/></marker>
+          <marker id="ah-crank" viewBox="0 0 10 10" refX="8" refY="5" markerUnits="userSpaceOnUse" markerWidth="12" markerHeight="12" orient="auto-start-reverse"><path d="M0 1 L10 5 L0 9 z" style="fill: var(--crank)"/></marker>
+          <marker id="ah-gamma" viewBox="0 0 10 10" refX="8" refY="5" markerUnits="userSpaceOnUse" markerWidth="12" markerHeight="12" orient="auto-start-reverse"><path d="M0 1 L10 5 L0 9 z" style="fill: var(--gamma)"/></marker>
+        </defs>
+        <rect width="696" height="576" fill="url(#grid)"/>
+        <g id="g-base"></g>
+        <g id="g-aux"></g>
+        <g id="g-ghost"></g>
+        <g id="g-mech"></g>
+        <g id="g-gam"></g>
+        <g id="g-hud"></g>
+      </svg>
+      <figcaption>
+        <span class="key"><i class="k-crank"></i>曲柄（原动件）</span>
+        <span class="key"><i class="k-ink"></i>导杆、滑块</span>
+        <span class="key"><i class="k-ghost"></i>导杆极限位置</span>
+        <span class="key"><i class="k-gamma"></i>作用力与速度</span>
+      </figcaption>
+    </figure>
+
+    <aside class="panel" aria-label="控制与读数">
+      <section class="group">
+        <h2>播放</h2>
+        <div class="row between">
+          <button id="play" class="btn primary" type="button">▶ 播放</button>
+          <div class="seg" role="group" aria-label="播放速度">
+            <button type="button" data-speed="0.25" aria-pressed="false">¼×</button>
+            <button type="button" data-speed="0.5" aria-pressed="false">½×</button>
+            <button type="button" data-speed="1" aria-pressed="true">1×</button>
+            <button type="button" data-speed="2" aria-pressed="false">2×</button>
+          </div>
+        </div>
+        <div class="slider">
+          <label for="phi">曲柄转角 <span><span class="var">φ</span> = <output id="phi-out" for="phi">47.8°</output></span></label>
+          <input id="phi" type="range" min="0" max="360" step="0.1" value="47.8">
+        </div>
+        <div class="row">
+          <button class="btn" type="button" id="go-fig">题图位置</button>
+          <button class="btn" type="button" id="go-1">极限位置 B<sub>1</sub></button>
+          <button class="btn" type="button" id="go-2">极限位置 B<sub>2</sub></button>
+        </div>
+        <p class="hint"><span class="var">φ</span> 从水平向右量起，逆时针为正。空格键播放 / 暂停。</p>
+      </section>
+
+      <section class="group">
+        <h2>当前位置</h2>
+        <dl class="readout">
+          <dt>导杆偏离 AC</dt><dd id="r-psi">—</dd>
+          <dt>角速度比 ω<sub>3</sub>/ω<sub>1</sub></dt><dd id="r-w">—</dd>
+          <dt>传动角 γ</dt><dd id="r-g">90°</dd>
+          <dt>行程</dt><dd><span id="r-stroke" class="pill slow">—</span></dd>
+        </dl>
+      </section>
+
+      <section class="group">
+        <h2>导杆摆角随曲柄转角的变化</h2>
+        <svg id="chart" class="chart" viewBox="0 0 320 156" role="img" aria-label="导杆偏离角随曲柄转角变化曲线，蓝色区间为快行程"></svg>
+        <dl class="readout">
+          <dt>导杆摆角 ψ</dt><dd id="r-swing">—</dd>
+          <dt>极位夹角 θ</dt><dd id="r-theta">—</dd>
+          <dt>行程速比系数 K</dt><dd id="r-k">—</dd>
+          <dt>快 / 慢行程曲柄转角</dt><dd id="r-split">—</dd>
+        </dl>
+      </section>
+
+      <section class="group">
+        <h2>显示</h2>
+        <div class="toggles">
+          <label class="toggle"><input id="t-ghost" type="checkbox" checked>极限位置与 θ</label>
+          <label class="toggle"><input id="t-gam" type="checkbox" checked>传动角 γ</label>
+          <label class="toggle"><input id="t-aux" type="checkbox">作图辅助线</label>
+        </div>
+      </section>
+
+      <section class="group">
+        <h2>参数</h2>
+        <div class="slider">
+          <label for="e">偏距 <span><span class="var">e</span> = <output id="e-out" for="e">10</output></span></label>
+          <input id="e" type="range" min="0" max="16" step="0.5" value="10">
+        </div>
+        <p class="hint">题图约为 10。拖到 0 就是普通摆动导杆机构，可对比两种情况下极限位置的变化。</p>
+      </section>
+    </aside>
+  </main>
+
+  <section class="notes" aria-label="对照题目">
+    <div class="note">
+      <h3><span class="q">(1)</span>导杆的极限位置</h3>
+      <p>B 到导杆的距离恒为 <span class="var">e</span>，所以 B 总在一条与导杆平行、相距 <span class="var">e</span> 的直线上。导杆摆到极限时，这条线与曲柄圆相切，此时 AB ⊥ 导杆。导杆本身切于以 A 为圆心、半径 <span class="var">r</span>+<span class="var">e</span> 与 <span class="var">r</span>−<span class="var">e</span> 的两个圆，而不是切于曲柄圆。打开「作图辅助线」可以看到。</p>
+    </div>
+    <div class="note">
+      <h3><span class="q">(2)</span>极位夹角 θ</h3>
+      <p>两个极限位置上 AB 都垂直于导杆，所以曲柄两位置之间的夹角与导杆摆角相同：θ = ψ。按题图比例约为 57.7°，K = (180° + θ)/(180° − θ) ≈ 1.94。曲柄转过 180° − θ 时导杆向右摆（快行程），转过 180° + θ 时向左摆回。</p>
+    </div>
+    <div class="note">
+      <h3><span class="q">(3)</span>传动角 γ</h3>
+      <p>不计摩擦时，滑块对导杆的作用力 F 垂直于导杆，作用线过滑块中心 P；P 在过 C 的导杆线上，其速度 v<sub>P</sub> 也垂直于导杆。F 与 v<sub>P</sub> 同向，压力角为 0，所以 γ = 90°，与机构位置无关。</p>
+    </div>
+  </section>
+</div>
+
+<script>
+(() => {
+  const D = Math.PI / 180;
+  const NS = 'http://www.w3.org/2000/svg';
+  // model units -> drawing px (y up in the model, y down on screen)
+  const S = 6, OX = 42, OY = 84;
+  const X = x => +((x + OX) * S).toFixed(2);
+  const Y = y => +((OY - y) * S).toFixed(2);
+  const pt = (x, y) => X(x) + ',' + Y(y);
+  const mod = (a, m) => ((a % m) + m) % m;
+  const fmt = (v, n = 1) => (Math.abs(v) < 0.05 ? 0 : v).toFixed(n);
+
+  const geo = { d: 45, r: 21, e: 10, L: 76, hl: 4.5, hw: 2.2 };
+  const PHI_FIG = 47.8;
+  const PERIOD = 6; // seconds per crank revolution at 1x
+  const state = { phi: PHI_FIG, playing: false, speed: 1 };
+  const show = { ghost: true, gam: true, aux: false };
+
+  const $ = id => document.getElementById(id);
+  function el(tag, attrs, parent) {
+    const n = document.createElementNS(NS, tag);
+    if (attrs) set(n, attrs);
+    if (parent) parent.appendChild(n);
+    return n;
+  }
+  function set(n, attrs) { for (const k in attrs) n.setAttribute(k, attrs[k]); return n; }
+  function txt(parent, x, y, s, attrs) {
+    const t = el('text', Object.assign({ x: X(x), y: Y(y) }, attrs || {}), parent);
+    t.textContent = s; return t;
+  }
+  function sub(t, main, low) {
+    t.textContent = main;
+    const s = el('tspan', { 'baseline-shift': 'sub', 'font-size': '70%' }, t);
+    s.textContent = low;
+    return t;
+  }
+  function arcPath(cx, cy, R, a0, a1) {
+    const x0 = cx + R * Math.cos(a0 * D), y0 = cy + R * Math.sin(a0 * D);
+    const x1 = cx + R * Math.cos(a1 * D), y1 = cy + R * Math.sin(a1 * D);
+    const large = Math.abs(a1 - a0) > 180 ? 1 : 0;
+    return `M${pt(x0, y0)} A${R * S} ${R * S} 0 ${large} 0 ${pt(x1, y1)}`;
+  }
+
+  // ---------- kinematics ----------
+  // A = (0, d), C = (0, 0). Guide through C at direction psi; B sits at distance e on its left side.
+  function solve(phi) {
+    const p = phi * D, { d, r, e } = geo;
+    const Bx = r * Math.cos(p), By = d + r * Math.sin(p);
+    const rho = Math.hypot(Bx, By);
+    const psi = Math.atan2(By, Bx) - Math.asin(e / rho);
+    const ux = Math.cos(psi), uy = Math.sin(psi);
+    const sP = Bx * ux + By * uy;
+    return { Bx, By, psi, ux, uy, nx: -uy, ny: ux, sP, Px: sP * ux, Py: sP * uy, alpha: 90 - psi / D };
+  }
+  function extremes() {
+    const { d, r, e } = geo;
+    const aR = Math.asin((e + r) / d) / D;      // guide farthest right of AC
+    const aL = Math.asin((e - r) / d) / D;      // guide farthest left of AC
+    const phi2 = mod(-aR, 360), phi1 = mod(180 - aL, 360);
+    const theta = aR - aL;
+    return { aR, aL, phi1, phi2, theta, K: (180 + theta) / (180 - theta) };
+  }
+  let EX = extremes();
+
+  function blockPoly(s) {
+    const { hl, hw } = geo;
+    return [[hl, hw], [hl, -hw], [-hl, -hw], [-hl, hw]]
+      .map(([a, b]) => pt(s.Px + a * s.ux + b * s.nx, s.Py + a * s.uy + b * s.ny)).join(' ');
+  }
+
+  // ---------- static base: frame line, supports, ω1 ----------
+  const gBase = $('g-base'), gAux = $('g-aux'), gGhost = $('g-ghost'), gMech = $('g-mech'), gGam = $('g-gam'), gHud = $('g-hud');
+  const inkStroke = 'stroke: var(--ink)';
+
+  el('line', { x1: X(0), y1: Y(-3), x2: X(0), y2: Y(geo.d + 8), style: 'stroke: var(--muted)', 'stroke-width': 1, 'stroke-dasharray': '14 4 2 4' }, gBase);
+
+  function support(x, y) {
+    const g = el('g', { style: inkStroke, 'stroke-width': 1.6, fill: 'none', 'stroke-linecap': 'round' }, gBase);
+    el('polyline', { points: `${pt(x - 3, y - 5.2)} ${pt(x, y)} ${pt(x + 3, y - 5.2)}` }, g);
+    el('line', { x1: X(x - 5), y1: Y(y - 5.2), x2: X(x + 5), y2: Y(y - 5.2), 'stroke-width': 2 }, g);
+    for (let i = 0; i < 6; i++) {
+      const hx = x - 4.2 + i * 1.75;
+      el('line', { x1: X(hx), y1: Y(y - 5.2), x2: X(hx - 1.5), y2: Y(y - 7.2), 'stroke-width': 1.2 }, g);
+    }
+  }
+  support(0, geo.d);
+  support(0, 0);
+
+  // rotation sense of the crank
+  el('path', { d: arcPath(0, geo.d, 6.2, 112, 168), fill: 'none', style: 'stroke: var(--crank)', 'stroke-width': 1.8, 'marker-end': 'url(#ah-crank)' }, gBase);
+  sub(txt(gBase, -8.6, geo.d + 6.6, '', { 'font-size': 18, style: 'fill: var(--crank)' }), 'ω', '1');
+
+  // ---------- auxiliary construction (toggle) ----------
+  const auxStatic = el('g', {}, gAux);
+  const offsetLine = el('line', { style: 'stroke: var(--crank)', 'stroke-width': 1.2, 'stroke-dasharray': '3 4', opacity: 0.8 }, gAux);
+  function buildAux() {
+    auxStatic.replaceChildren();
+    const { d, r, e } = geo;
+    const circ = (R, dash, style) => el('circle', { cx: X(0), cy: Y(d), r: R * S, fill: 'none', style, 'stroke-width': 1.2, 'stroke-dasharray': dash }, auxStatic);
+    circ(r, '5 4', 'stroke: var(--crank)');
+    circ(r + e, '14 4 2 4', 'stroke: var(--muted)');
+    if (Math.abs(r - e) > 0.5) circ(Math.abs(r - e), '14 4 2 4', 'stroke: var(--muted)');
+    const lab = (R, ang, s) => txt(auxStatic, R * Math.cos(ang * D) - 1.5, d + R * Math.sin(ang * D) + 1, s, { class: 't-aux' });
+    lab(r + e + 1.6, 138, 'r+e');
+    if (Math.abs(r - e) > 0.5) lab(Math.abs(r - e) + 1.4, 90, e < r ? 'r−e' : 'e−r');
+  }
+
+  // ---------- extreme positions (toggle) ----------
+  function buildGhost() {
+    gGhost.replaceChildren();
+    const g = el('g', { style: 'stroke: var(--ghost)', fill: 'none', 'stroke-width': 1.6, 'stroke-dasharray': '7 5' }, gGhost);
+    const { d, r } = geo;
+    [[EX.phi1, '1'], [EX.phi2, '2']].forEach(([phi, k]) => {
+      const s = solve(phi);
+      el('line', { x1: X(0), y1: Y(0), x2: X(geo.L * s.ux), y2: Y(geo.L * s.uy) }, g);
+      el('polygon', { points: blockPoly(s), 'stroke-width': 1.2 }, g);
+      if (geo.e > geo.hw + 0.4) el('line', { x1: X(s.Bx), y1: Y(s.By), x2: X(s.Px + geo.hw * s.nx), y2: Y(s.Py + geo.hw * s.ny), 'stroke-width': 1.2 }, g);
+      el('line', { x1: X(0), y1: Y(d), x2: X(s.Bx), y2: Y(s.By), 'stroke-width': 2 }, g);
+      el('circle', { cx: X(s.Bx), cy: Y(s.By), r: 5, style: 'stroke: var(--ghost); fill: var(--sheet)', 'stroke-dasharray': 'none', 'stroke-width': 1.5 }, g);
+      const ux = Math.cos(phi * D), uy = Math.sin(phi * D);
+      sub(txt(gGhost, s.Bx + ux * 4.2 - 1.6, s.By + uy * 4.2 - 1.4, '', { class: 't-ghost', 'font-size': 19 }), 'B', k);
+    });
+    // θ at A: between AB2 and the extension of AB1 through A
+    const ext = -EX.aL; // direction of AB1 extended beyond A
+    el('line', { x1: X(0), y1: Y(d), x2: X(r * 0.85 * Math.cos(ext * D)), y2: Y(d + r * 0.85 * Math.sin(ext * D)), 'stroke-dasharray': '2 4', 'stroke-width': 1.4 }, g);
+    el('path', { d: arcPath(0, d, 10, -EX.aR, ext), 'stroke-dasharray': 'none', 'stroke-width': 1.6 }, g);
+    const mt = (-EX.aR + ext) / 2;
+    txt(gGhost, 13.2 * Math.cos(mt * D) - 1, d + 13.2 * Math.sin(mt * D) - 1.4, 'θ', { class: 't-ghost', 'font-size': 20 });
+    // ψ at C: between the two extreme guide lines
+    el('path', { d: arcPath(0, 0, 17, 90 - EX.aR, 90 - EX.aL), 'stroke-dasharray': 'none', 'stroke-width': 1.6 }, g);
+    const mp = 90 - (EX.aR + EX.aL) / 2;
+    txt(gGhost, 20.5 * Math.cos(mp * D) - 1.3, 20.5 * Math.sin(mp * D) - 1, 'ψ', { class: 't-ghost', 'font-size': 20 });
+  }
+
+  // ---------- mechanism ----------
+  const guide = el('line', { style: inkStroke, 'stroke-width': 3, 'stroke-linecap': 'round' }, gMech);
+  const block = el('polygon', { style: 'stroke: var(--ink); fill: var(--sheet)', 'stroke-width': 2.2, 'stroke-linejoin': 'round' }, gMech);
+  const arm = el('line', { style: inkStroke, 'stroke-width': 3, 'stroke-linecap': 'round' }, gMech);
+  const weld = el('circle', { r: 3.6, style: 'fill: var(--ink)' }, gMech);
+  const crank = el('line', { style: 'stroke: var(--crank)', 'stroke-width': 4, 'stroke-linecap': 'round' }, gMech);
+  const hinge = (cx, cy) => el('circle', { cx, cy, r: 6.6, style: 'stroke: var(--ink); fill: var(--sheet)', 'stroke-width': 2.2 }, gMech);
+  hinge(X(0), Y(geo.d));
+  hinge(X(0), Y(0));
+  const hB = hinge(0, 0);
+  txt(gMech, -4.6, geo.d + 1.6, 'A', { 'font-size': 21 });
+  txt(gMech, -4.8, 1.2, 'C', { 'font-size': 21 });
+  const labB = txt(gMech, 0, 0, 'B', { 'font-size': 21 });
+  const labE = txt(gMech, 0, 0, 'e', { 'font-size': 18, class: 't-aux' });
+
+  // ---------- force / velocity at P (toggle) ----------
+  const vArrow = el('line', { style: 'stroke: var(--gamma)', 'stroke-width': 2.4, 'marker-end': 'url(#ah-gamma)' }, gGam);
+  const fArrow = el('line', { style: 'stroke: var(--gamma)', 'stroke-width': 2.4, 'stroke-dasharray': '6 3', 'marker-end': 'url(#ah-gamma)' }, gGam);
+  const vLab = txt(gGam, 0, 0, '', { class: 't-gamma', 'font-size': 17 }); sub(vLab, 'v', 'P');
+  const fLab = txt(gGam, 0, 0, 'F', { class: 't-gamma', 'font-size': 17 });
+
+  // ---------- HUD ----------
+  const hud1 = txt(gHud, -40, 80, '', { class: 't-ui' });
+  const hud2 = txt(gHud, -40, 76.6, '', { class: 't-ui' });
+
+  // ---------- chart ----------
+  const chart = $('chart');
+  const C = { w: 320, h: 156, l: 44, r: 8, t: 10, b: 26 };
+  let cy0, cy1;
+  const cx = phi => C.l + (phi / 360) * (C.w - C.l - C.r);
+  const cyv = a => C.t + (cy1 - a) / (cy1 - cy0) * (C.h - C.t - C.b);
+  let chartMarker, chartGuide;
+  function buildChart() {
+    chart.replaceChildren();
+    cy0 = EX.aL - 8; cy1 = EX.aR + 8;
+    const bottom = C.h - C.b;
+    // fast stroke band
+    const a = EX.phi1, b = EX.phi2;
+    const band = (p0, p1) => el('rect', { x: cx(p0), y: C.t, width: cx(p1) - cx(p0), height: bottom - C.t, style: 'fill: var(--crank-soft)' }, chart);
+    if (b >= a) band(a, b); else { band(a, 360); band(0, b); }
+    // axes + grid
+    el('line', { x1: C.l, y1: bottom, x2: C.w - C.r, y2: bottom, style: 'stroke: var(--rule)' }, chart);
+    el('line', { x1: C.l, y1: cyv(0), x2: C.w - C.r, y2: cyv(0), style: 'stroke: var(--rule)', 'stroke-dasharray': '2 3' }, chart);
+    [0, 90, 180, 270, 360].forEach(v => {
+      el('line', { x1: cx(v), y1: bottom, x2: cx(v), y2: bottom + 3, style: 'stroke: var(--muted)' }, chart);
+      const t = el('text', { x: cx(v), y: bottom + 14, 'text-anchor': 'middle' }, chart); t.textContent = v + '°';
+    });
+    [[EX.aR, '右 '], [EX.aL, '左 ']].forEach(([v, side]) => {
+      el('line', { x1: C.l, y1: cyv(v), x2: C.w - C.r, y2: cyv(v), style: 'stroke: var(--ghost)', 'stroke-dasharray': '4 3', 'stroke-width': 1 }, chart);
+      const t = el('text', { x: C.l - 4, y: cyv(v) + 3.5, 'text-anchor': 'end', style: 'fill: var(--ghost)' }, chart); t.textContent = side.trim() + Math.abs(v).toFixed(0) + '°';
+    });
+    { const t = el('text', { x: C.l - 4, y: cyv(0) + 3.5, 'text-anchor': 'end' }, chart); t.textContent = '0°'; }
+    // figure position
+    el('line', { x1: cx(PHI_FIG), y1: C.t, x2: cx(PHI_FIG), y2: bottom, style: 'stroke: var(--muted)', 'stroke-dasharray': '1 3' }, chart);
+    { const t = el('text', { x: cx(PHI_FIG) + 3, y: C.t + 9 }, chart); t.textContent = '题图'; }
+    { const t = el('text', { x: (cx(a) + cx(b)) / 2, y: C.t + 11, 'text-anchor': 'middle', style: 'fill: var(--crank)' }, chart); t.textContent = '快行程'; }
+    // curve
+    let dstr = '';
+    for (let p = 0; p <= 360; p += 2) dstr += (p ? 'L' : 'M') + cx(p).toFixed(1) + ' ' + cyv(solve(p).alpha).toFixed(1);
+    el('path', { d: dstr, fill: 'none', style: 'stroke: var(--ink)', 'stroke-width': 1.6 }, chart);
+    chartGuide = el('line', { y1: C.t, y2: bottom, style: 'stroke: var(--crank)', 'stroke-width': 1, opacity: 0.6 }, chart);
+    chartMarker = el('circle', { r: 4, style: 'fill: var(--crank); stroke: var(--sheet)', 'stroke-width': 1.5 }, chart);
+  }
+
+  // ---------- readouts ----------
+  function refreshResults() {
+    $('r-swing').textContent = EX.theta.toFixed(1) + '°';
+    $('r-theta').textContent = EX.theta.toFixed(1) + '°';
+    $('r-k').textContent = EX.K.toFixed(2);
+    $('r-split').textContent = (180 - EX.theta).toFixed(1) + '° / ' + (180 + EX.theta).toFixed(1) + '°';
+  }
+
+  let lastDir = 1;
+  function render() {
+    const s = solve(state.phi);
+    const { d, e, hw } = geo;
+    set(guide, { x1: X(0), y1: Y(0), x2: X(geo.L * s.ux), y2: Y(geo.L * s.uy) });
+    set(block, { points: blockPoly(s) });
+    const hasArm = e > hw + 0.4;
+    const ax = s.Px + hw * s.nx, ay = s.Py + hw * s.ny;
+    arm.style.display = weld.style.display = labE.style.display = hasArm ? '' : 'none';
+    set(arm, { x1: X(s.Bx), y1: Y(s.By), x2: X(ax), y2: Y(ay) });
+    set(weld, { cx: X(ax), cy: Y(ay) });
+    set(labE, { x: X((s.Bx + ax) / 2 + 1.9 * s.ux - 0.8), y: Y((s.By + ay) / 2 + 1.9 * s.uy - 1.2) });
+    set(crank, { x1: X(0), y1: Y(d), x2: X(s.Bx), y2: Y(s.By) });
+    set(hB, { cx: X(s.Bx), cy: Y(s.By) });
+    const cu = Math.cos(state.phi * D), cv = Math.sin(state.phi * D);
+    set(labB, { x: X(s.Bx + cu * 3.6 - 1.6 - 1.2 * s.ux), y: Y(s.By + cv * 3.6 - 1.4 - 1.2 * s.uy) });
+
+    // offset line through B (parallel to guide)
+    set(offsetLine, { x1: X(s.Bx - 30 * s.ux), y1: Y(s.By - 30 * s.uy), x2: X(s.Bx + 22 * s.ux), y2: Y(s.By + 22 * s.uy) });
+
+    // guide angular velocity ratio (CCW positive)
+    const h = 0.05;
+    const w = (solve(state.phi + h).psi - solve(state.phi - h).psi) / (2 * h * D);
+    if (Math.abs(w) > 1e-3) lastDir = Math.sign(w);
+    // velocity of P on the guide is ω3 × CP, i.e. along ±n
+    // drawn on the side of the slider away from B so they never cross the arm;
+    // both point along ±n, the direction P is actually moving
+    const len = 8, off = 2.4;
+    const arrow = (line, lab, k) => {
+      const ex = s.Px + k * off * s.ux - (hw + 0.6) * s.nx, ey = s.Py + k * off * s.uy - (hw + 0.6) * s.ny; // slider edge
+      const fx = ex - len * s.nx, fy = ey - len * s.ny;                                                     // far end
+      const [x1, y1, x2, y2] = lastDir > 0 ? [fx, fy, ex, ey] : [ex, ey, fx, fy];
+      set(line, { x1: X(x1), y1: Y(y1), x2: X(x2), y2: Y(y2) });
+      set(lab, { x: X(fx - 2.8 * s.nx + k * 1.4 * s.ux - 1.2), y: Y(fy - 2.8 * s.ny + k * 1.4 * s.uy - 1.2) });
+    };
+    arrow(vArrow, vLab, -1);
+    arrow(fArrow, fLab, 1);
+
+    // readouts
+    const phiTxt = fmt(state.phi) + '°';
+    $('phi-out').textContent = phiTxt;
+    $('phi').value = state.phi.toFixed(1);
+    const a = s.alpha;
+    const psiTxt = Math.abs(a) < 0.05 ? '0.0°' : (a > 0 ? '右 ' : '左 ') + Math.abs(a).toFixed(1) + '°';
+    $('r-psi').textContent = psiTxt;
+    $('r-w').textContent = (w >= 0 ? '+' : '−') + Math.abs(w).toFixed(3);
+    const pill = $('r-stroke');
+    const near = (p) => Math.min(mod(state.phi - p, 360), mod(p - state.phi, 360)) < 0.6;
+    let strokeTxt;
+    if (near(EX.phi1) || near(EX.phi2)) { pill.className = 'pill dead'; strokeTxt = near(EX.phi1) ? '极限位置 B₁' : '极限位置 B₂'; }
+    else if (mod(state.phi - EX.phi1, 360) < mod(EX.phi2 - EX.phi1, 360)) { pill.className = 'pill fast'; strokeTxt = '快行程 · 导杆右摆'; }
+    else { pill.className = 'pill slow'; strokeTxt = '慢行程 · 导杆左摆'; }
+    pill.textContent = strokeTxt;
+    hud1.textContent = 'φ = ' + phiTxt + '   导杆 ' + psiTxt;
+    hud2.textContent = strokeTxt;
+
+    if (chartMarker) {
+      set(chartMarker, { cx: cx(state.phi), cy: cyv(a) });
+      set(chartGuide, { x1: cx(state.phi), x2: cx(state.phi) });
+    }
+  }
+
+  function applyToggles() {
+    gGhost.style.display = show.ghost ? '' : 'none';
+    gGam.style.display = show.gam ? '' : 'none';
+    gAux.style.display = show.aux ? '' : 'none';
+  }
+
+  function rebuild() {
+    EX = extremes();
+    buildAux(); buildGhost(); buildChart(); refreshResults(); render();
+  }
+
+  // ---------- animation ----------
+  let raf = 0, last = null;
+  function tick(t) {
+    if (!state.playing) { raf = 0; last = null; return; }
+    if (last !== null) {
+      const dt = Math.min(0.05, (t - last) / 1000);
+      state.phi = mod(state.phi + (360 / PERIOD) * state.speed * dt, 360);
+      render();
+    }
+    last = t;
+    raf = requestAnimationFrame(tick);
+  }
+  function setPlaying(on) {
+    state.playing = on;
+    $('play').textContent = on ? '❚❚ 暂停' : '▶ 播放';
+    $('play').setAttribute('aria-pressed', on ? 'true' : 'false');
+    if (on && !raf) { last = null; raf = requestAnimationFrame(tick); }
+  }
+  function goTo(phi) { setPlaying(false); state.phi = mod(phi, 360); render(); }
+
+  $('play').addEventListener('click', () => setPlaying(!state.playing));
+  document.querySelectorAll('.seg button').forEach(b => b.addEventListener('click', () => {
+    state.speed = +b.dataset.speed;
+    document.querySelectorAll('.seg button').forEach(o => o.setAttribute('aria-pressed', o === b ? 'true' : 'false'));
+  }));
+  $('phi').addEventListener('input', ev => goTo(+ev.target.value));
+  $('go-fig').addEventListener('click', () => goTo(PHI_FIG));
+  $('go-1').addEventListener('click', () => goTo(EX.phi1));
+  $('go-2').addEventListener('click', () => goTo(EX.phi2));
+  $('t-ghost').addEventListener('change', ev => { show.ghost = ev.target.checked; applyToggles(); });
+  $('t-gam').addEventListener('change', ev => { show.gam = ev.target.checked; applyToggles(); });
+  $('t-aux').addEventListener('change', ev => { show.aux = ev.target.checked; applyToggles(); });
+  $('e').addEventListener('input', ev => {
+    geo.e = +ev.target.value;
+    $('e-out').textContent = geo.e % 1 ? geo.e.toFixed(1) : String(geo.e);
+    rebuild();
+  });
+  document.addEventListener('keydown', ev => {
+    if (ev.code !== 'Space') return;
+    const tag = (ev.target.tagName || '').toLowerCase();
+    if (tag === 'input' || tag === 'button' || tag === 'select' || tag === 'textarea') return;
+    ev.preventDefault();
+    setPlaying(!state.playing);
+  });
+
+  // restore form state the browser may have kept
+  show.ghost = $('t-ghost').checked; show.gam = $('t-gam').checked; show.aux = $('t-aux').checked;
+  geo.e = +$('e').value; $('e-out').textContent = String(geo.e);
+  applyToggles();
+  rebuild();
+  const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  setPlaying(!reduce);
+})();
+</script>
